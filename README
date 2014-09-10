@@ -1,0 +1,6 @@
+Para ejecutar:
+./pln.py <frase.txt
+
+Esto utiliza freeling online por medio de webservices.
+Deben descargar la librería utilizando pip, la misma se llama 'suds'.
+Por mas detalles consultarme.
