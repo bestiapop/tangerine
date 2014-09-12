@@ -1,0 +1,24 @@
+Para ejecutar:
+./pln.py <frase.txt
+./tarea_1.py
+
+#LIBRERIAS
+suds
+openpyxl
+
+Las descargan utilizando pip o algún otro método.
+
+#REV2
+Agregado la lista de palabras positivas y negativas(.pl)
+Agregado el archivo con comentarios .xlsx
+Agregado lista de stopwords
+Agregado tarea_1.py, que hace las funcionalidades de la letra hasta el punto 4.a
+
+Observar que para no procesar tantos comentarios a nivel de implementación se utilizan únicamente los dos primeros comentarios del archivo.
+Se debe ajustar la variable xls_range, con los valores adecuados.
+
+NOTA:
+Tratemos de utilizar el estandar de implementación PEP8 http://legacy.python.org/dev/peps/pep-0008/
+Realmente es muy cómodo y visualmente atractivo si se utiliza de forma adecuada.
+
+;)
