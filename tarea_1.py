@@ -41,6 +41,17 @@ def lematization(lang, coment, ws_datatype, stopwords):
     return ret
 
 
+def encoding(st):
+    st = re.sub(r"·", "á", st)
+    st = re.sub(r"È", "é", st)
+    st = re.sub(r"Ì", "í", st)
+    st = re.sub(r"Û", "ó", st)
+    st = re.sub(r"˙", "ú", st)
+    st = re.sub(r"Ò", "ñ", st)
+    st = re.sub(r"¸", "ü", st)
+    return st
+
+
 if __name__ == "__main__":
 
     # used structures
@@ -51,7 +62,7 @@ if __name__ == "__main__":
     negativeWords = {}
 
     # used vars
-    xls_range = 'G3:H4'
+    xls_range = 'G22:H22'
     lang = "es"
 
     # creates a webserver with wsdl url
@@ -60,7 +71,6 @@ if __name__ == "__main__":
     FL_ws = Client(wsdl_url)
     # create ws
     ws_datatype = FL_ws.factory.create('ns3:Map')
-
     _comentarios = 'Comentarios_Peliculas.xlsx'
     try:
         wb = load_workbook(_comentarios)
@@ -93,10 +103,11 @@ if __name__ == "__main__":
                 if line.rstrip():
                     m = re.match(r"elementoSubjetivo\('(.*)',(.*)\)+", line)
                     if m:
+                        key = encoding(m.group(1))
                         if m.group(2) == '3':
-                            positiveWords[m.group(1)] = m.group(2)
+                            positiveWords[key] = m.group(2)
                         else:
-                            negativeWords[m.group(1)] = m.group(2)
+                            negativeWords[key] = m.group(2)
         elemList.close
     except IOError:
         print "File " + _listaElemfile + " not exists!"
@@ -120,6 +131,19 @@ if __name__ == "__main__":
     mydicneg = sorted(mydicneg.iteritems(), key=operator.itemgetter(1))
     mydicpos = sorted(mydicpos.iteritems(), key=operator.itemgetter(1))
 
+    for words in mydicneg:
+        (w, i) = words
+        print w
+
     # print the last 100 elements
-    print mydicneg[-100:]
-    print mydicpos[-100:]
+    #print mydicneg[-100:]
+    #print mydicpos[-100:]
+    mydicneg = [seq[0] for seq in mydicneg][-100:]
+    mydicpos = [seq[0] for seq in mydicpos][-100:]
+
+    # print 100 negative words
+    for word in mydicneg:
+        print word
+    # print 100 positive words
+    for word in mydicpos:
+        print word
