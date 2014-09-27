@@ -10,6 +10,7 @@ import freeling
 import numpy as np
 import matplotlib.pyplot as plt
 import codecs
+import getopt
 
 #excel api
 from openpyxl import load_workbook
@@ -19,7 +20,20 @@ from openpyxl import load_workbook
 from suds.client import Client
 from suds.xsd.doctor import *
 reload(sys)
-
+def parse(word):
+    word = re.sub("á", u"á", word)
+    word = re.sub("é", u"é", word)
+    word = re.sub("í", u"í", word)
+    word = re.sub("ó", u"ó", word)
+    word = re.sub("ú", u"ú", word)
+    word = re.sub("ñ", u"ñ", word)
+    word = re.sub("Á", u"Á", word)
+    word = re.sub("É", u"É", word)
+    word = re.sub("Í", u"Í", word)
+    word = re.sub("Ó", u"Ó", word)
+    word = re.sub("Ú", u"Ú", word)
+    word = re.sub("Ñ", u"Ñ", word)
+    return word
 
 def lematization(lang, coment, ws_datatype, stopwords):
     ws_datatype.item = {'key': 'input_direct_data', 'value': coment}, \
@@ -41,6 +55,8 @@ def lematization(lang, coment, ws_datatype, stopwords):
                 if not re.match(r"^F.*", tag) and \
                 not re.match(r"^Z.*", tag) and \
                 not lema in stopwords:
+                    #lema = parse(lema)
+                    lema = unicode(lema, "UTF-8")
                     ret.append(lema)
     file.close
     return ret
@@ -55,7 +71,6 @@ def lematization_freeling(comment, tk, sp, mf, tg, sen, parser, stopwords):
     ls = sen.analyze(ls)
     ls = parser.analyze(ls)
     #ls = dep.analyze(ls);
-
     ## output results
     lista = []
     for s in ls:
@@ -66,6 +81,7 @@ def lematization_freeling(comment, tk, sp, mf, tg, sen, parser, stopwords):
             if not re.match(r"^F.*", tag) and \
             not re.match(r"^Z.*", tag) and \
             not lema in stopwords:
+                #lema = parse(lema)
                 lista.append(lema)
             #print(w.get_form() + " " + w.get_lemma() + " " + w.get_tag() + " ")
             ##+w.get_senses_string());
@@ -80,12 +96,9 @@ def plot(negativeDic, n_groups):
     fig, ax = plt.subplots()
     index = np.arange(n_groups)
     bar_width = 0.35
-
     opacity = 0.4
     error_config = {'ecolor': '0.3'}
-
     plt.bar(index, values, bar_width, alpha=opacity, color='b', error_kw=error_config, label='Comentario')
-
     plt.xlabel('Comment')
     plt.ylabel('#Comments')
     plt.title('Top words')
@@ -98,6 +111,17 @@ def plot(negativeDic, n_groups):
 
 
 if __name__ == "__main__":
+
+    ws = False
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "w", [])
+    except getopt.GetoptError:
+        print 'Invalid arguments'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-w':
+            print 'Webservice Mode'
+            ws = True
 
     # used structures
     stopwordsdic = {}
@@ -112,13 +136,10 @@ if __name__ == "__main__":
     DATA = FREELINGDIR + "/share/freeling/"
     LANG = "es"
     freeling.util_init_locale("default")
-    # create language analyzer
-    #la=freeling.lang_ident(DATA+"common/lang_ident/ident.dat");
 
     # create options set for maco analyzer. Default values are Ok,
     # except for data files.
     op = freeling.maco_options(LANG)
-    #()
     # user_map, false
     # affix_analysis, false
     # multiple_words_detection, true
@@ -147,20 +168,17 @@ if __name__ == "__main__":
     sen = freeling.senses(DATA + LANG + "/senses.dat")
 
     parser = freeling.chart_parser(DATA + LANG + "/chunker/grammar-chunk.dat")
-    #dep=freeling.dep_txala(DATA+LANG+"/dep/dependences.dat", parser.get_start_symbol());
 
-    # used vars
     #xls_range = 'G22:H22'
     #xls_range = 'G875:H875'
     xls_range = 'B2:C8'
-    lang = "es"
 
     # creates a webserver with wsdl url
-    #wsdl_url = 'http://ws04.iula.upf.edu/soaplab2-axis/services/' \
-    #'morphosintactic_tagging.freeling_tagging?wsdl'
-    #FL_ws = Client(wsdl_url)
+    wsdl_url = 'http://ws04.iula.upf.edu/soaplab2-axis/services/' \
+    'morphosintactic_tagging.freeling_tagging?wsdl'
+    FL_ws = Client(wsdl_url)
     # create ws
-    #ws_datatype = FL_ws.factory.create('ns3:Map')
+    ws_datatype = FL_ws.factory.create('ns3:Map')
 
     #_comentarios = 'Comentarios_Peliculas.xlsx'
     _comentarios = 'test.xlsx'
@@ -215,8 +233,11 @@ if __name__ == "__main__":
         else:
             insert = mydicpos
         #lematize and filter F words
-        #lista = lematization(lang, valor.value, ws_datatype, stopwordsdic)
-        lista = lematization_freeling(valor.value, tk, sp, mf, tg, sen, parser, stopwordsdic)
+        #
+        if ws:
+            lista = lematization(LANG, valor.value, ws_datatype, stopwordsdic)
+        else:
+            lista = lematization_freeling(valor.value, tk, sp, mf, tg, sen, parser, stopwordsdic)
         list_aux = []
         for word in lista:
             if not word in allWords.keys():
@@ -241,13 +262,14 @@ if __name__ == "__main__":
     posInter = set(mydicposList).intersection(positiveWords.keys())
 
     #print negInter
-    for w in mydicneg:
+    for (w, i) in mydicneg:
         print w
 
     print "positive Words"
-    for w in mydicpos:
+    for (w, i) in mydicpos:
         print w
     # A (Dina suggest)
+    print allWords
     plot(allWords, 10)
 
     # B (Dina suggest)
