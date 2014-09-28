@@ -64,7 +64,9 @@ class Utils:
         with open(self.__outfile) as data:
             for words in data:
                 if words.rstrip():
-                    (_, lema, tag, _) = words.split()
+                    args = words.split()
+                    lema = args[1]
+                    tag = args[2]
                     if not re.match(r"^F.*", tag) and \
                     not re.match(r"^Z.*", tag) and \
                     not lema in stopwords:
@@ -94,7 +96,7 @@ class Utils:
         ax.set_ylim(0, ysize + 3)
         plt.tight_layout()
         fig.savefig(self.__dir_images + filename, dpi=90)
-        #plt.show()
+        plt.show()
 
     def loadXLSFile(self):
         try:
