@@ -3,116 +3,150 @@
 
 #imports
 import sys
+import os
 import operator
-import urllib
 import re
-import freeling
 import numpy as np
 import matplotlib.pyplot as plt
-import codecs
 import getopt
-
 #excel api
 from openpyxl import load_workbook
-
-
-#soap client
-from suds.client import Client
-from suds.xsd.doctor import *
+from webservice import WebService
 reload(sys)
-def parse(word):
-    word = re.sub("á", u"á", word)
-    word = re.sub("é", u"é", word)
-    word = re.sub("í", u"í", word)
-    word = re.sub("ó", u"ó", word)
-    word = re.sub("ú", u"ú", word)
-    word = re.sub("ñ", u"ñ", word)
-    word = re.sub("Á", u"Á", word)
-    word = re.sub("É", u"É", word)
-    word = re.sub("Í", u"Í", word)
-    word = re.sub("Ó", u"Ó", word)
-    word = re.sub("Ú", u"Ú", word)
-    word = re.sub("Ñ", u"Ñ", word)
-    return word
-
-def lematization(lang, coment, ws_datatype, stopwords):
-    ws_datatype.item = {'key': 'input_direct_data', 'value': coment}, \
-    {'key': 'language', 'value': lang}
-    # invocate ws
-    result = FL_ws.service.runAndWaitFor(ws_datatype)
-    # select output_url tag and store in tmp_file
-    # saves in temporal file, else fails
-    for item in result.item:
-        if item.key == "output_url":
-            rfile = item.value
-            urllib.urlretrieve(rfile, "tmp_file")
-
-    ret = []
-    with open("tmp_file") as tmp_file:
-        for line in tmp_file:
-            if line.rstrip():
-                (word, lema, tag, _, _, _) = line.split()  # unification
-                if not re.match(r"^F.*", tag) and \
-                not re.match(r"^Z.*", tag) and \
-                not lema in stopwords:
-                    #lema = parse(lema)
-                    lema = unicode(lema, "UTF-8")
-                    ret.append(lema)
-    file.close
-    return ret
 
 
-def lematization_freeling(comment, tk, sp, mf, tg, sen, parser, stopwords):
-    l = tk.tokenize(comment)
-    ls = sp.split(l, 1)
+class Utils:
 
-    ls = mf.analyze(ls)
-    ls = tg.analyze(ls)
-    ls = sen.analyze(ls)
-    ls = parser.analyze(ls)
-    #ls = dep.analyze(ls);
-    ## output results
-    lista = []
-    for s in ls:
-        ws = s.get_words()
-        for w in ws:
-            tag = w.get_tag()
-            lema = w.get_lemma()
-            if not re.match(r"^F.*", tag) and \
-            not re.match(r"^Z.*", tag) and \
-            not lema in stopwords:
-                #lema = parse(lema)
-                lista.append(lema)
-            #print(w.get_form() + " " + w.get_lemma() + " " + w.get_tag() + " ")
-            ##+w.get_senses_string());
-    return lista
+    # CONFIG ARGS
+    __host = "localhost"
+    __port = "50005"
+    __infile = "temp_file"
+    __outfile = "data_file"
+    __dir_images = 'figures/'
+
+    # files to load
+    __comment_file = 'Comentarios_Peliculas.xlsx'
+    __xls_range = 'G3:H875'
+    __stopwords_file = 'stopwords.txt'
+    __listaElem_file = 'listasElementosSubjetivos.pl'
+
+    def __init__(self):
+        pass
+
+    def parse(self, word):
+        word = re.sub("á", u"á", word)
+        word = re.sub("é", u"é", word)
+        word = re.sub("í", u"í", word)
+        word = re.sub("ó", u"ó", word)
+        word = re.sub("ú", u"ú", word)
+        word = re.sub("ñ", u"ñ", word)
+        word = re.sub("Á", u"Á", word)
+        word = re.sub("É", u"É", word)
+        word = re.sub("Í", u"Í", word)
+        word = re.sub("Ó", u"Ó", word)
+        word = re.sub("Ú", u"Ú", word)
+        word = re.sub("Ñ", u"Ñ", word)
+        return word
+
+    def tmpFile(self, comment):
+        temp = open(self.__infile, "w")
+        temp.write(comment.encode('utf-8', 'replace'))
+        temp.flush
+        temp.close
+
+    def lematization_freeling_client(self, comment, stopwords):
+        self.tmpFile(comment)
+        command = "analyzer_client " + self.__host + ":" + self.__port \
+            + "<" + self.__infile + " >" + self.__outfile
+        os.system(command)
+
+        lista = []
+        with open(self.__outfile) as data:
+            for words in data:
+                if words.rstrip():
+                    (_, lema, tag, _) = words.split()
+                    if not re.match(r"^F.*", tag) and \
+                    not re.match(r"^Z.*", tag) and \
+                    not lema in stopwords:
+                        lema = unicode(lema, "UTF-8")
+                        lista.append(lema)
+        return lista
+
+    def plot(self, negativeDic, n_groups, filename):
+        xvalues = [seq[0] for seq in negativeDic][:n_groups]
+        values = [seq[1] for seq in negativeDic][:n_groups]
+        n_groups = min(n_groups, len(xvalues))
+        ysize = max(values)
+        fig, ax = plt.subplots()
+        index = np.arange(n_groups)
+        bar_width = 0.35
+        opacity = 0.4
+        error_config = {'ecolor': '0.3'}
+        plt.bar(index, values, bar_width, alpha=opacity, color='b',
+            error_kw=error_config, label='Comentario')
+        ax.set_xticklabels(xvalues, rotation=45)
+        plt.xlabel('Comment')
+        plt.ylabel('#Comments')
+        plt.title('Top words')
+        plt.xticks(index + bar_width / 2, xvalues)
+        #index +bar_width
+        #plt.legend()
+        ax.set_ylim(0, ysize + 3)
+        plt.tight_layout()
+        fig.savefig(self.__dir_images + filename, dpi=90)
+        #plt.show()
+
+    def loadXLSFile(self):
+        try:
+            wb = load_workbook(self.__comment_file)
+        except IOError:
+            print ("File " + self.__comment_file + " not exists!")
+            sys.exit(0)
+
+        sheets = wb.get_sheet_names()
+        sheet = wb.get_sheet_by_name(sheets[0])
+        cell_range = sheet.range(self.__xls_range)
+        return cell_range
+
+    def loadStopwords(self):
+        stopwords = {}
+        try:
+            with open(self.__stopwords_file) as stopwordsfile:
+                for line in stopwordsfile:
+                    if line.rstrip():
+                        stopwords[line.rstrip()] = 0
+
+            stopwordsfile.close
+        except IOError:
+            print("File " + self.__stopwords_file + " not exists!")
+            sys.exit(0)
+        return stopwords
+
+    def loadSubjetiveElems(self):
+        positiveWords = {}
+        negativeWords = {}
+        try:
+            with open(self.__listaElem_file) as elemList:
+                for line in elemList:
+                    if line.rstrip():
+                        m = re.match(r"elementoSubjetivo\('(.*)',(.*)\)+", line)
+                        if m:
+                            key = m.group(1)
+                            if m.group(2) == '3':
+                                positiveWords[key] = m.group(2)
+                            else:
+                                negativeWords[key] = m.group(2)
+            elemList.close
+        except IOError:
+            print("File " + self.__listaElem_file + " not exists!")
+            sys.exit(0)
+        return (positiveWords, negativeWords)
 
 
-def plot(negativeDic, n_groups):
-    xvalues = [seq[0] for seq in negativeDic][:n_groups]
-    values = [seq[1] for seq in negativeDic][:n_groups]
-    n_groups = min(n_groups, len(xvalues))
-    ysize = max(values)
-    fig, ax = plt.subplots()
-    index = np.arange(n_groups)
-    bar_width = 0.35
-    opacity = 0.4
-    error_config = {'ecolor': '0.3'}
-    plt.bar(index, values, bar_width, alpha=opacity, color='b', error_kw=error_config, label='Comentario')
-    plt.xlabel('Comment')
-    plt.ylabel('#Comments')
-    plt.title('Top words')
-    plt.xticks(index + bar_width / 2, xvalues)
-    #index +bar_width
-    plt.legend()
-    ax.set_ylim(0, ysize + 3)
-    plt.tight_layout()
-    plt.show()
-
-
-if __name__ == "__main__":
-
+def main():
     ws = False
+    utils = Utils()
+    webService = None
     try:
         opts, args = getopt.getopt(sys.argv[1:], "w", [])
     except getopt.GetoptError:
@@ -122,110 +156,18 @@ if __name__ == "__main__":
         if opt == '-w':
             print 'Webservice Mode'
             ws = True
+            webService = WebService()
 
     # used structures
-    stopwordsdic = {}
     mydicneg = {}
     mydicpos = {}
-    positiveWords = {}
-    negativeWords = {}
     allWords = {}
 
-    # configure Freeling
-    FREELINGDIR = "/usr/local"
-    DATA = FREELINGDIR + "/share/freeling/"
-    LANG = "es"
-    freeling.util_init_locale("default")
+    cell_range = utils.loadXLSFile()
+    stopwords = utils.loadStopwords()
+    (positiveWords, negativeWords) = utils.loadSubjetiveElems()
 
-    # create options set for maco analyzer. Default values are Ok,
-    # except for data files.
-    op = freeling.maco_options(LANG)
-    # user_map, false
-    # affix_analysis, false
-    # multiple_words_detection, true
-    # Numbers detection, true
-    # punctuation_detection, true
-    # dates_detection, false
-    # quantities_detection, true
-    # dictionary_search, true
-    # probability_assignament, true
-    # Ner_recongition false
-    op.set_active_modules(0, 0, 1, 1, 1, 0, 1, 1, 1, 0)
-
-
-    op.set_data_files("",
-        DATA + LANG + "/locucions.dat", DATA + LANG + "/quantities.dat",
-        DATA + LANG + "/afixos.dat", DATA + LANG + "/probabilitats.dat",
-        DATA + LANG + "/dicc.src", DATA + LANG + "/np.dat",
-        DATA + "common/punct.dat")
-
-    # create analyzers
-    tk = freeling.tokenizer(DATA + LANG + "/tokenizer.dat")
-    sp = freeling.splitter(DATA + LANG + "/splitter.dat")
-    mf = freeling.maco(op)
-
-    tg = freeling.hmm_tagger(DATA + LANG + "/tagger.dat", 1, 2)
-    sen = freeling.senses(DATA + LANG + "/senses.dat")
-
-    parser = freeling.chart_parser(DATA + LANG + "/chunker/grammar-chunk.dat")
-
-    #xls_range = 'G22:H22'
-    #xls_range = 'G875:H875'
-    xls_range = 'B2:C8'
-
-    # creates a webserver with wsdl url
-    wsdl_url = 'http://ws04.iula.upf.edu/soaplab2-axis/services/' \
-    'morphosintactic_tagging.freeling_tagging?wsdl'
-    FL_ws = Client(wsdl_url)
-    # create ws
-    ws_datatype = FL_ws.factory.create('ns3:Map')
-
-    #_comentarios = 'Comentarios_Peliculas.xlsx'
-    _comentarios = 'test.xlsx'
-    try:
-        wb = load_workbook(_comentarios)
-    except IOError:
-        print ("File " + _comentarios + " not exists!")
-        sys.exit(0)
-
-    sheets = wb.get_sheet_names()
-    sheet = wb.get_sheet_by_name(sheets[0])
-    cell_range = sheet.range(xls_range)
-
-    #loading stop words in dictionary(faster vs list)
-    _stopwfile = 'stopwords.txt'
-    try:
-        with open(_stopwfile) as stopwords:
-            for line in stopwords:
-                if line.rstrip():
-                    stopwordsdic[line.rstrip()] = 0
-
-        stopwords.close
-    except IOError:
-        print("File " + stopwfile + " not exists!")
-        sys.exit(0)
-
-    # loading subjetive elements list in dictionary
-    _listaElemfile = 'listasElementosSubjetivos.pl'
-    try:
-        with open(_listaElemfile) as elemList:
-            for line in elemList:
-                if line.rstrip():
-                    m = re.match(r"elementoSubjetivo\('(.*)',(.*)\)+", line)
-                    if m:
-                        key = m.group(1) #encoding(m.group(1))
-                        if m.group(2) == '3':
-                            positiveWords[key] = m.group(2)
-                        else:
-                            negativeWords[key] = m.group(2)
-        elemList.close
-    except IOError:
-        print("File " + _listaElemfile + " not exists!")
-        sys.exit(0)
-
-
-    # using freeling
-    #reading the comment file
+    # Iteration over cell_range
     for rows in cell_range:
         (valor, key) = rows
         if key.value < 3:
@@ -233,11 +175,11 @@ if __name__ == "__main__":
         else:
             insert = mydicpos
         #lematize and filter F words
-        #
         if ws:
-            lista = lematization(LANG, valor.value, ws_datatype, stopwordsdic)
+            lista = webService.lematization_freeling_ws(valor.value, stopwords)
         else:
-            lista = lematization_freeling(valor.value, tk, sp, mf, tg, sen, parser, stopwordsdic)
+            lista = utils.lematization_freeling_client(valor.value, stopwords)
+
         list_aux = []
         for word in lista:
             if not word in allWords.keys():
@@ -249,33 +191,58 @@ if __name__ == "__main__":
                 allWords[word] = allWords[word] + 1
 
     # ordering the dic (<)
-    mydicneg = sorted(mydicneg.iteritems(), key=operator.itemgetter(1), reverse=True)
-    mydicpos = sorted(mydicpos.iteritems(), key=operator.itemgetter(1), reverse=True)
-    allWords = sorted(allWords.iteritems(), key=operator.itemgetter(1), reverse=True)
+    mydicnegSorted = sorted(mydicneg.iteritems(), key=operator.itemgetter(1),
+        reverse=True)
+    mydicposSorted = sorted(mydicpos.iteritems(), key=operator.itemgetter(1),
+        reverse=True)
+    allWordsSorted = sorted(allWords.iteritems(), key=operator.itemgetter(1),
+        reverse=True)
 
-    mydicnegList = [seq[0] for seq in mydicneg][:100]
-    mydicposList = [seq[0] for seq in mydicpos][:100]
-    allWordsList = [seq[0] for seq in allWords][:100]
+    mydicnegList = [seq[0] for seq in mydicnegSorted][:100]
+    mydicposList = [seq[0] for seq in mydicposSorted][:100]
+    allWordsList = [seq[0] for seq in allWordsSorted][:100]
 
     # intersection
-    negInter = set(mydicnegList).intersection(negativeWords.keys())
-    posInter = set(mydicposList).intersection(positiveWords.keys())
+    negativeI = set(mydicnegList).intersection(negativeWords.keys())
+    positiveI = set(mydicposList).intersection(positiveWords.keys())
 
-    #print negInter
-    for (w, i) in mydicneg:
-        print w
+    #for graph c
+    dicPosC = {}
+    dicNegC = {}
 
-    print "positive Words"
-    for (w, i) in mydicpos:
-        print w
+    # Transform intersection to dictionary
+    for pos in positiveI:
+        dicPosC[pos] = mydicpos[pos]
+
+    for neg in negativeI:
+        dicNegC[neg] = mydicneg[neg]
+
+    dicNegC = sorted(dicNegC.iteritems(), key=operator.itemgetter(1),
+        reverse=True)
+    dicPosC = sorted(dicPosC.iteritems(), key=operator.itemgetter(1),
+        reverse=True)
+
+
+    # Print top 100 positive and negative Words
+    print '\033[1m\033[31m' + 'Negative Words' + '\033[0m'
+    for negative in negativeI:
+        print '\t' + negative
+
+    print '\n' + '\033[1m\033[32m' + 'Positive Words' + '\033[0m'
+    for positive in positiveI:
+        print '\t' + positive
+
+    # Graphs
     # A (Dina suggest)
-    print allWords
-    plot(allWords, 10)
+    utils.plot(allWordsSorted, 20, 'AllWords.png')
 
     # B (Dina suggest)
-    #plot(mydicneg, 14)
-    #plot(mydicpos, 14)
+    utils.plot(mydicnegSorted, 20, 'NegativeWords.png')
+    utils.plot(mydicposSorted, 20, 'PositiveWords.png')
 
+    # C (Dina suggest)
+    utils.plot(dicNegC[:100], 20, 'NegativeSubjetive.png')
+    utils.plot(dicPosC[:100], 20, 'PositiveSubjetiveWords.png')
 
-    #for word in negInter:
-    #    print(word)
+if __name__ == "__main__":
+    main()
