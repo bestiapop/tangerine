@@ -18,6 +18,8 @@
 	1) Tratemos de utilizar el estandar de implementación PEP8 http://legacy.python.org/dev/peps/pep-0008/
 	Realmente es muy cómodo y visualmente atractivo si se utiliza de forma adecuada.
 	2) Las variables para ajustar se encuentran en la clase Utils del archivo tarea_1.py, los directorios de entrada y salida, así como el rango de las celdas, y otras configuraciones locales.
+	3) Informe modificable, se encuentra en ./Documentos/InformeImpl/Source.tex, creo que es la mejor manera de trabajar, ya que se puede versionar y es elegante, si no quieren instalar dependencias, perfectamente lo pueden compilar usando el siguiente sitio(https://www.writelatex.com/), caso contrario lo compilo aquí :).
+	4)En esta revisión se han eliminado los archivos no necesarios, dejando un entorno en calidad de semi-release. Faltan detalles sobre los resultados que supongo se estarán realizando al correr de la tarde.
 
 ;)
 
