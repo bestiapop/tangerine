@@ -94,8 +94,8 @@ class Utils:
         for rect in rect1:
             height = rect.get_height()
             ax.text(rect.get_x() + rect.get_width() / 2., 1.02 * height,
-                '%.3f' % (float(height) / totalwords), ha='center', va='bottom',
-                rotation=45)
+                '%.3f %%' % (float(height * 100) / totalwords), ha='center',
+                va='bottom', rotation=45)
         ax.set_ylim(0, ysize * 1.05)
         plt.tight_layout()
         fig.savefig(self.__dir_images + filename, dpi=90)
