@@ -18,19 +18,22 @@ reload(sys)
 class Utils:
 
     # CONFIG ARGS
-    __host = "localhost"
-    __port = "50005"
-    __infile = "temp_file"
-    __outfile = "data_file"
+    __host = 'localhost'
+    __port = '50005'
+    __infile = 'temp_file'
+    __outfile = 'data_file'
     __dir_images = 'figures/'
+    __xls_range = 'G3:H875'
 
     # files to load
-    __comment_file = 'Comentarios_Peliculas.xlsx'
-    __xls_range = 'G3:H875'
-    __stopwords_file = 'stopwords.txt'
-    __listaElem_file = 'listasElementosSubjetivos.pl'
+    __resources = './resources/'
+    __comment_file = __resources + 'Comentarios_Peliculas.xlsx'
+    __stopwords_file = __resources + 'stopwords.txt'
+    __listaElem_file = __resources + 'listasElementosSubjetivos.pl'
 
     def __init__(self):
+        if not os.path.exists(self.__dir_images):
+            os.makedirs(self.__dir_images)
         pass
 
     def parse(self, word):
@@ -56,8 +59,8 @@ class Utils:
 
     def lematization_freeling_client(self, comment, stopwords):
         self.tmpFile(comment)
-        command = "analyzer_client " + self.__host + ":" + self.__port \
-            + "<" + self.__infile + " >" + self.__outfile
+        command = 'analyzer_client ' + self.__host + ':' + self.__port \
+            + '<' + self.__infile + ' >' + self.__outfile
         os.system(command)
 
         lista = []
@@ -105,7 +108,7 @@ class Utils:
         try:
             wb = load_workbook(self.__comment_file)
         except IOError:
-            print ("File " + self.__comment_file + " not exists!")
+            print ('File ' + self.__comment_file + ' not exists!')
             sys.exit(0)
 
         sheets = wb.get_sheet_names()
@@ -123,7 +126,7 @@ class Utils:
 
             stopwordsfile.close
         except IOError:
-            print("File " + self.__stopwords_file + " not exists!")
+            print('File ' + self.__stopwords_file + ' not exists!')
             sys.exit(0)
         return stopwords
 
@@ -143,9 +146,13 @@ class Utils:
                                 negativeWords[key] = m.group(2)
             elemList.close
         except IOError:
-            print("File " + self.__listaElem_file + " not exists!")
+            print('File ' + self.__listaElem_file + ' not exists!')
             sys.exit(0)
         return (positiveWords, negativeWords)
+
+    def clean(self):
+        os.remove(self.__infile)
+        os.remove(self.__outfile)
 
 
 def main():
@@ -205,7 +212,6 @@ def main():
 
     mydicnegList = [seq[0] for seq in mydicnegSorted][:100]
     mydicposList = [seq[0] for seq in mydicposSorted][:100]
-    allWordsList = [seq[0] for seq in allWordsSorted][:100]
 
     # intersection
     negativeI = set(mydicnegList).intersection(negativeWords.keys())
@@ -226,7 +232,6 @@ def main():
         reverse=True)
     dicPosC = sorted(dicPosC.iteritems(), key=operator.itemgetter(1),
         reverse=True)
-
 
     # Print top 100 positive and negative Words
     print '\033[1m\033[31m' + 'Negative Words' + '\033[0m'
@@ -249,6 +254,9 @@ def main():
     # C (Dina suggest)
     utils.plot(dicNegC[:100], 20, 'NegativeSubjetive.png', totalwords)
     utils.plot(dicPosC[:100], 20, 'PositiveSubjetiveWords.png', totalwords)
+
+    # clean tmp files
+    utils.clean()
 
 if __name__ == "__main__":
     main()

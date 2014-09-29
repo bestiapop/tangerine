@@ -1,31 +1,23 @@
-Para ejecutar:
-./pln.py <frase.txt
-<<<<<<< HEAD
+#EJECUTANDO
+	## iniciamos el servidor freeling
+	analyze -f ./config/es.cfg --server --port 50005 &
 
-Esto utiliza freeling online por medio de webservices.
-Deben descargar la librería utilizando pip, la misma se llama 'suds'.
-Por mas detalles consultarme.
-=======
-./tarea_1.py
+	## ejecutamos la tarea
+	./tarea_1.py
+	./tarea_1.py -w  ##webservice mode
 
 #LIBRERIAS
-suds
-openpyxl
+	suds
+	openpyxl
+	matplotlib
+	numpy
 
-Las descargan utilizando pip o algún otro método.
+	Las descargan utilizando pip o algún otro método(easyinstall).
 
-#REV2
-Agregado la lista de palabras positivas y negativas(.pl)
-Agregado el archivo con comentarios .xlsx
-Agregado lista de stopwords
-Agregado tarea_1.py, que hace las funcionalidades de la letra hasta el punto 4.a
-
-Observar que para no procesar tantos comentarios a nivel de implementación se utilizan únicamente los dos primeros comentarios del archivo.
-Se debe ajustar la variable xls_range, con los valores adecuados.
-
-NOTA:
-Tratemos de utilizar el estandar de implementación PEP8 http://legacy.python.org/dev/peps/pep-0008/
-Realmente es muy cómodo y visualmente atractivo si se utiliza de forma adecuada.
+#NOTAS
+	1) Tratemos de utilizar el estandar de implementación PEP8 http://legacy.python.org/dev/peps/pep-0008/
+	Realmente es muy cómodo y visualmente atractivo si se utiliza de forma adecuada.
+	2) Las variables para ajustar se encuentran en la clase Utils del archivo tarea_1.py, los directorios de entrada y salida, así como el rango de las celdas, y otras configuraciones locales.
 
 ;)
->>>>>>> origin/master
+
