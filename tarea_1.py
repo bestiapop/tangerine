@@ -167,10 +167,12 @@ class Utils:
 
     def generateStatisticData(self, allWords, posWords, negWords, t, n):
         data = open(self.__res + 'Data.txt', "w")
+        inter = (len(posWords) + len(negWords)) - len(allWords)
         save = ''
-        save = save + 'Total Words: %d \n' % len(allWords)
-        save = save + 'Total Positive Words: %d\n' % len(posWords)
-        save = save + 'Total Negative Words: %d\n' % len(negWords)
+        save = save + 'Total Lemma: %d \n' % len(allWords)
+        save = save + 'Total Positive Lemma: %d\n' % len(posWords)
+        save = save + 'Total Negative Lemma: %d\n' % len(negWords)
+        save = save + 'Total negative & positive Lemma: %d\n' % inter
         save = save + 'Total comments: %d\n' % t
         save = save + 'Total negative comments: %d\n' % n
         save = save + 'Total positive comments: %d\n' % (t - n)

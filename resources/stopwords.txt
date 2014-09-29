@@ -152,6 +152,7 @@ juntos
 la
 largo
 las
+le
 lo
 los
 mas
@@ -197,6 +198,7 @@ nuestras
 nuestro
 nuestros
 nunca
+o
 os
 otra
 otras

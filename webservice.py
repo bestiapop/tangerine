@@ -2,7 +2,7 @@
 from suds.client import Client
 from suds.xsd.doctor import *
 import urllib
-
+import re
 
 class WebService:
     __lang = "es"
