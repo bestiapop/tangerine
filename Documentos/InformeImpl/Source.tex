@@ -1,7 +1,3 @@
-
-
-
-
 \documentclass[12pt]{article}
 
 %Import packages
@@ -22,6 +18,7 @@
 \usepackage{rotating}
 \usepackage{graphicx}
 
+%%config indice, referencias, metadata.
 \hypersetup{
     pdftitle={Tarea 1 PLN},
     bookmarksnumbered=true,     
@@ -29,19 +26,23 @@
     bookmarksopenlevel=1,       
     colorlinks=true,            
     pdfstartview=Fit,           
-    pdfpagemode=UseOutlines,    % this is the option you were lookin for
+    pdfpagemode=UseOutlines,
     pdfpagelayout=TwoPageRight,
     urlcolor=blue,
     linkcolor=blue,
     citecolor=red
 }
 
-\title{Tarea 1 \\ IPLN} 
+% titulo
+\title{Tarea 1 \\ IPLN \\ Grupo 9} 
+
+% autores
 \author{
-  Victor Díaz \\
-  Valentina Da Silva \\
+  Valentina Da Silva 5.113.011-5\\
+  Victor Díaz 4.295.936-0\\
   Leonardo Clavijo 5.054.830-5
 }
+
 \date{\today}
 
 
@@ -53,9 +54,7 @@ En este presente documento se procede a la explicación, tanto de la implementac
 \end{abstract}
 
 \newpage
-
 \tableofcontents
-
 \newpage
 
 \section{Introduction}
@@ -64,6 +63,7 @@ Por lo tanto en la implementación contamos con dos modos de ejecución, esto pu
 Al pensar en ambos casos, tenemos la ventaja de que si no contamos con alguno de ellos, podemos utilizar el otro método.
 
 \section{Requerimientos}
+
 \subsection{Librerías}\label{lib}
 Para la correcta ejecución de la aplicación es necesario contar con el siguiente conjunto de librerías:
 \begin{itemize}
@@ -102,14 +102,16 @@ Los parámetros que se utilizaron para configurar Freeling en modo servidor fuer
 \end{itemize}
 Estos fueron las configuraciones más importantes a tener en cuenta en el análisis morfológico, se deja a consideración el archivo ubicado en $./config/es.cfg$ para más detalles, además el mismo debe procesarse cuando se inicia el servicio de Freeling.
 
+
 \section{Ejecución}
 Para ejecutar la aplicación, únicamente se le debe brindar permisos de ejecución al archivo $tarea_1.py$, y mediante línea de comandos la siguiente orden:
 $./tarea_1.py$
-O $./tarea_1.py -w$ para ejecutarlo utilizando webservices anteriormente descripto.
+O $./tarea_1.py -w$ para ejecutarlo utilizando webservices anteriormente descrito.
+
 
 \section{Visualización}
-
 Se muestra la interacción del sistema, según el modo de ejecución.
+
 \begin{figure}[!h]
   \centering
     \includegraphics[width=0.8\textwidth]{./fig/arq.png}
@@ -118,7 +120,7 @@ Se muestra la interacción del sistema, según el modo de ejecución.
 \end{figure} 
 
 
-\section{Implementación}
+\section{Implementación} \label{impl}
 Se procede a la descripción de la implementación del programa. Para ello se utilizaron dos clases básicas para las configuraciones:
 \begin{enumerate}
    \item Utils : que se encuentra en el mismo archivo a ejecutar $tarea_1.py$, la misma se encarga de realizar operaciones de lectura y escritura en los archivos, así como el porcesamiento de los datos utilizando Freeling.
@@ -126,9 +128,12 @@ Se procede a la descripción de la implementación del programa. Para ello se ut
  \end{enumerate} 
 
 A continuación se describe las funciones definidas en el archivo $tarea_1.py$, específicamente de la clase útils.
-\subsection{loadXLSFile}
+
+
+\subsection{loadXLSFile} \label{xlslib}
 Encabezado: $def$ $loadXLSFile(self)$
-Cuando se instancia la clase $Utils$, en sus atributos privados se encuentran ciertos parámetros que definen las condiciones a tener en cuenta para la lectura del archivo $.xlsx$, en particular el nombre del mismo $\_\_comment\_file$ y el rango de las celdas que deben ser procesadas($\_\_xls\_range$), básicamente utiliza la librería descripta en la sección anterior librería \ref{lib}, y devuelve como resultado el rango de celdas especificado por el parámetro en cuestión, el cual será iterado en la función main.
+Cuando se instancia la clase $Utils$, en sus atributos privados se encuentran ciertos parámetros que definen las condiciones a tener en cuenta para la lectura del archivo $.xlsx$, en particular el nombre del mismo $\_\_comment\_file$ y el rango de las celdas que deben ser procesadas($\_\_xls\_range$), básicamente utiliza la librería descrita en la sección anterior librería \ref{lib}, y devuelve como resultado el rango de celdas especificado por el parámetro en cuestión, el cual será iterado en la función main.
+
 
 \subsection{loadStopwords}
 Encabezado: $def$ $loadStopwords(self)$
@@ -151,7 +156,7 @@ Su funcionalidad principal es tomar un comentario específico mediante una strin
 Se utiliza como función para garantizar la legibilidad de la función principal $main$.
 
 
-\subsection{plot}
+\subsection{plot} \label{func:plot}
 Encabezado: $def$ $plot(self, listaPlot, n\_groups, filename)$ \\
 Argumentos:
 \begin{itemize}
@@ -189,18 +194,57 @@ Se presenta a continuación un pseudo-código de la implementación.
   
   \State $imagenes \gets graficarResultados(pos, neg)$
 \end{algorithmic}
-
 La simplicidad que brinda Python para el procesamiento de datos, básicamente resume el pseudocódigo en la implementación en sí misma, salvo detalles menores que requieren un procesamiento refinado.
 
 
-\section{Eficiencia}
+\subsection{Eficiencia}
 La complejidad del un programa se reduce a las estructuras utilizadas, la correcta utilización de las mismas implica implica impacto directo sobre la eficiencia del programa. Para ello se utilizaron Diccionarios para almacenar las palabras contenidas en los comentarios, de esta forma poder acceder en orden 1. La búsqueda se reduce a investigar si la llave(key) de indexado se encuentra presente en el Diccionario. Por lo contrario, utilizando listas, la performance al procesar una lista mayor de comentarios tiene un impacto negativo en tiempos de ejecución.
 Se recomienda fuertemente utilizar el modo de ejecución con servidor local con Freeling, de esta forma se reducen costos de tráfico de red y posibles "errores de ejecución" ajenas al programa diseñado.
 La simplicidad de utilizar expresiones regulares para realizar reemplazos y búsquedas impacta positivamente en el desempeño del programa, es por ello que se utilizaron las mismas para sintetizar la lista de elementos subjetivos. Además agrega elegancia a la solución.
-
 La captura de excepciones permite brindarle al usuario un detalle sobre los requerimientos que debe satisfacer para ejecutar correctamente el programa, para ello se implementó un manejo de las mismas en los casos de lectura y escritura de archivos así como también en el caso del WebService, que en ocasiones adversas no responde de forma adecuada.
 
+
+\section{Análisis}
+En las secciones anteriores se ha detallado aspectos de inicialización del ambiente para ejecutar la aplicación, así como las configuraciones pertinentes de Freeling, detalles sobre la implementación y algunas consideraciones sobre eficiencia. En este apartado se analizarán los resultados obtenidos luego de la ejecución del programa. Para ello en las siguientes subsecciones se detallarán los puntos requeridos en la letra del laboratorio.
+
+
+\subsection{Información CORPUS}
+Para esta consigna se utilizó la librería $openpyxl$ ya citada en la sección Librerías [\ref{lib}]. Básicamente se utilizó la función $loadXLSFile$ descrita en la sección Implementación [\ref{xlslib}], particularmente no se realizó un mapeo a memoria de los comentarios y sus respectivos puntajes, debido a que almacenar los mismos en estructuras internas como ser listas o diccionarios implica contar con memoria extra para ejecutar la aplicación. En lugar de ello se recorre el archivo .xls brindado, haciendo lecturas del archivo en sí mismo, y no realizando el almacenamiento para su posterior lectura. Por lo tanto la información no se extrae completamente, pero sí parcialmente, con el fin de mejorar el rendimiento tanto en consumo de memoria como en la velocidad de ejecución del programa.
+La lectura se realiza por medio de la función $loadXLSFile$ y posteriormente se recorre en la función $main$, 'lematizando' y realizando un análisis morfosintáctico, pero ello hace parte de la siguiente subsección.
+
+
+\subsection{Procesamiento Información} \label{proc}
+Como se mencionó anteriormente, las tareas de extracción de la información del CORPUS y el procesamiento de la información mediante Freeling se realizaron en paralelo con la finalidad de optimizar recursos y potenciar la eficiencia del programa. Para este punto se puede utilizar procesamiento mediante WebServices o un servidor Freeling local(recomendado), las configuraciones del servidor local se encuentran detalladas exhaustivamente en el archivo $es.cfg$ que se encuentra en el directorio $/config$. Los detalles particulares sobre la configuración de Freeling ya fueron mencionados[\ref{configFree}].
+En la función $main$ se utiliza la función $lematizacion\_freeling\_client$ para procesar el comentario perteneciente al CORPUS, la cual tiene como retorno una lista de las palabras únicamente con el lema, puesto que el tag se utiliza para filtrar algunos elementos que no serán necesarios para el post procesamiento, en este caso se filtraron los siguientes tags:
+\begin{itemize}
+  \item $F$ : Denotan signos de puntuación, los cuales no consideraremos en nuestro análisis posterior.
+  \item $Z$ : Los determinantes numerales tampoco son considerados en el análisis. 
+\end{itemize}
+Una vez que se cuenta con la lista de lemas de las palabras de un comentario, se almacenan en un diccionario usando como llave dicho lema, y como valor un dato del tipo Integer, con la finalidad de contabilizar la cantidad de veces que ocurre dicho lema en todos los comentarios a estudiar. Dicho conteo se realiza una vez por comentario, no la cantidad de ocurrencias global, con el fin de evitar comentarios con repetición de palabras que puedan interferir en el análisis de la muestra.
+Se agregan los lemas en tres diccionarios, uno contiene todos los lemas procesados hasta el momento, y realiza el conteo global de todos los lemas independientemente del puntaje de un comentario. El segundo diccionario contiene únicamente los lemas que ocurren en comentarios evaluados con notas 1 y 2, mientras que el tercer diccionario almacena los lemas que ocurren en comentarios cuyo puntaje es 3,4 o 5. 
+
+
+\subsection{Incorporar Recursos}
+Este punto se realiza ejecutando las funciones descritas en la sección implementación[\ref{impl}], ellas son $loadSubjetiveElems$, la cual se encarga de incorporar el léxico suministrado en el archivo $listasElementosSubjetivos.pl$ y la función $loadStopwords$ que incorpora el archivo $stopwords.txt$ que contiene una lista con las palabras vacías, a modo de poder filtrar una cantidad mayor de palabras.
+Ambos archivos se encuentran en el directorio $/resources$ junto con el .xls a procesar.
+Las funciones retornan un diccionario con las palabras que se encuentran en los respectivos archivos, en el caso de los elementos subjetivos retorna dos diccionarios, uno con las palabras positivas y el otro las negativas, a modo de trabajar posteriormente con conjuntos y realizar las intersecciones pertinentes.
+
+
+\subsection{Relación léxico-puntuación}
+En esta subsección se comentarán los puntos 4.a y 4.b presentes en la letra del Obligatorio.
+
+\subsubsection{Parte a}
+Como se describió anteriormente, se generaron diccionarios que contienen las palabras positivas y negativas[\ref{proc}], una vez se tienen estos diccionarios, se utiliza la función $sorted$ brindada por Python, para ordenar los diccionarios según los valores indexados(no la llave), se utiliza la clase $operator$ para dicho requerimiento. De esta forma se obtienen dos listas con elementos ordenados de forma decreciente, para las palabras positivas y negativas. Posteriormente se seleccionan los primeros cien elementos de cada lista, y con esto se satisface el punto a. Debido a que en el proceso de $lematization$ ya se realiza el filtrado de las palabras excluyendo las palabras vacías, las listas con cien elementos queda totalmente definida y cumpliendo con los requerimientos.
+
+\subsubsection{Parte b}
+Una vez se obtienen las listas ordenadas con los cien elementos positivos y negativos es fácil realizar la intersección, para ello se transforma en un conjunto las listas recién mencionadas y se utiliza $intersection$ propiedad de conjuntos definida en Python, con las llaves de las palabras negativas y positivas obtenidas en el momento de incorporar la lista de elementos subjetivos(genera diccionarios $(positiveWords, negativeWords)$). De esa forma obtenemos una lista con la intersección de elementos positivos y negativos.
+Posteriormente por eficiencia se transforma dicha lista en un diccionario con los valores de los diccionarios generados en el proceso $lematization$, finalmente se ordena el diccionario y se procesan los datos con la función $plot$ en diversos órdenes[\ref{func:plot}].
+En las gráficas se describen los valores porcentuales de las palabras en cuestión, con el fin de generar una idea sobre la utilización de las mismas en la totalidad de los comentarios.
+
+
 \section{Conclusiones}\label{conclusions}
+Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación, así como en el análisis de los datos.
+
 \subsection{Implementación}
 Lenguaje de programación alto nivel, presenta gran diversidad de librerías internas como externas que facilitan la tarea en gran parte. Su alto nivel permite no definir tipos específicos y de esta forma se trabaja de manera más fluida, aunque esto pueda llegar a confusiones si no se declaran correctamente las variables con un nombre adecuado.
 Escaso tiempo de implementación, dada la versatilidad, el tiempo de implementación se reduce considerablemente considerando con otros lenguajes de programación.
@@ -210,6 +254,8 @@ Portabilidad con sistemas operativos no es 100\% satisfactorio, para desarrollar
 Salvo detalles menores es un lenguaje adecuado para utilizarlo para el procesamiento de datos a pequeña y mediana escala.
 Al brindar características de un paradigma funcional(map, zip, etc), brinda simplicidad y 'ahorro' en cantidad de líneas utilizadas en total.
 La unificación derivada de la programación lógica, combinada con paradigma funcional hace un lenguaje poderoso con lo que refiere manipulación de datos en general, una característica deseable también como  ser la posibilidad de generar APIs con swig y combinar la eficiencia de c++ en la ejecución de algoritmos que requieran uso excesivo del recurso CPU. 
+
+\subsection{Resultados}
 
 %\bibliographystyle{abbrv}
 %\bibliography{simple}
