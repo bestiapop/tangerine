@@ -24,6 +24,7 @@ class Utils:
     __outfile = 'data_file'
     __dir_images = 'figures/'
     __xls_range = 'G3:H875'
+    __res = 'res/'
 
     # files to load
     __resources = './resources/'
@@ -34,6 +35,8 @@ class Utils:
     def __init__(self):
         if not os.path.exists(self.__dir_images):
             os.makedirs(self.__dir_images)
+        if not os.path.exists(self.__res):
+            os.makedirs(self.__res)
         pass
 
     def parse(self, word):
@@ -78,31 +81,32 @@ class Utils:
         return lista
 
     def plot(self, negativeDic, n_groups, filename, totalwords):
-        xvalues = [seq[0] for seq in negativeDic][:n_groups]
-        values = [seq[1] for seq in negativeDic][:n_groups]
-        n_groups = min(n_groups, len(xvalues))
-        ysize = max(values)
-        fig, ax = plt.subplots()
-        index = np.arange(n_groups)
-        bar_width = 0.35
-        opacity = 0.4
-        error_config = {'ecolor': '0.3'}
-        rect1 = plt.bar(index, values, bar_width, alpha=opacity, color='b',
-            error_kw=error_config, label='Comentario')
-        ax.set_xticklabels(xvalues, rotation=45)
-        plt.xlabel('Comment')
-        plt.ylabel('#Comments')
-        plt.title('Top words')
-        plt.xticks(index + bar_width / 2, xvalues)
-        for rect in rect1:
-            height = rect.get_height()
-            ax.text(rect.get_x() + rect.get_width() / 2., 1.02 * height,
-                '%.3f %%' % (float(height * 100) / totalwords), ha='center',
-                va='bottom', rotation=45)
-        ax.set_ylim(0, ysize * 1.05)
-        plt.tight_layout()
-        fig.savefig(self.__dir_images + filename, dpi=90)
-        plt.show()
+        if negativeDic:
+            xvalues = [seq[0] for seq in negativeDic][:n_groups]
+            values = [seq[1] for seq in negativeDic][:n_groups]
+            n_groups = min(n_groups, len(xvalues))
+            ysize = max(values)
+            fig, ax = plt.subplots()
+            index = np.arange(n_groups)
+            bar_width = 0.35
+            opacity = 0.4
+            error_config = {'ecolor': '0.3'}
+            rect1 = plt.bar(index, values, bar_width, alpha=opacity, color='b',
+                error_kw=error_config, label='Comentario')
+            ax.set_xticklabels(xvalues, rotation=45)
+            plt.xlabel('Comment')
+            plt.ylabel('#Comments')
+            plt.title('Top words')
+            plt.xticks(index + bar_width / 2, xvalues)
+            for rect in rect1:
+                height = rect.get_height()
+                ax.text(rect.get_x() + rect.get_width() / 2., 1.02 * height,
+                    '%.3f %%' % (float(height * 100) / totalwords), ha='center',
+                    va='bottom', rotation=45)
+            ax.set_ylim(0, ysize * 1.05)
+            plt.tight_layout()
+            fig.savefig(self.__dir_images + filename, dpi=90)
+            plt.show()
 
     def loadXLSFile(self):
         try:
@@ -139,7 +143,7 @@ class Utils:
                     if line.rstrip():
                         m = re.match(r"elementoSubjetivo\('(.*)',(.*)\)+", line)
                         if m:
-                            key = m.group(1)
+                            key = unicode(m.group(1), 'UTF-8')
                             if m.group(2) == '3':
                                 positiveWords[key] = m.group(2)
                             else:
@@ -149,6 +153,29 @@ class Utils:
             print('File ' + self.__listaElem_file + ' not exists!')
             sys.exit(0)
         return (positiveWords, negativeWords)
+
+    """Dado una lista de palabras, las guarda en un archivo con el nombre
+    filename, el objetivo de esto es obtener datos estadisticos para realizar
+    el informe"""
+    def generateData(self, allWords, filename):
+        saveAll = open(self.__res + filename, "w")
+        save = ''
+        for (lema, frec) in allWords:
+            save = save + lema + ',' + '%d' % frec + '\n'
+        saveAll.write(save.encode('utf-8', 'replace'))
+        saveAll.close
+
+    def generateStatisticData(self, allWords, posWords, negWords, t, n):
+        data = open(self.__res + 'Data.txt', "w")
+        save = ''
+        save = save + 'Total Words: %d \n' % len(allWords)
+        save = save + 'Total Positive Words: %d\n' % len(posWords)
+        save = save + 'Total Negative Words: %d\n' % len(negWords)
+        save = save + 'Total comments: %d\n' % t
+        save = save + 'Total negative comments: %d\n' % n
+        save = save + 'Total positive comments: %d\n' % (t - n)
+        data.write(save)
+        data.close
 
     def clean(self):
         os.remove(self.__infile)
@@ -179,11 +206,14 @@ def main():
     stopwords = utils.loadStopwords()
     (positiveWords, negativeWords) = utils.loadSubjetiveElems()
 
+    negComm = 0
+    numComm = len(cell_range)
     # Iteration over cell_range
     for rows in cell_range:
         (valor, key) = rows
         if key.value < 3:
             insert = mydicneg
+            negComm = negComm + 1
         else:
             insert = mydicpos
         #lematize and filter F words
@@ -255,8 +285,16 @@ def main():
     utils.plot(dicNegC[:100], 20, 'NegativeSubjetive.png', totalwords)
     utils.plot(dicPosC[:100], 20, 'PositiveSubjetiveWords.png', totalwords)
 
+    # Statistic data
+    utils.generateData(mydicnegSorted, 'negativeWords.csv')
+    utils.generateData(mydicposSorted, 'positiveWords.csv')
+    utils.generateData(allWordsSorted, 'allWords.csv')
+    utils.generateStatisticData(allWordsSorted, mydicposSorted, mydicnegSorted,
+        numComm, negComm)
+
     # clean tmp files
     utils.clean()
+
 
 if __name__ == "__main__":
     main()
