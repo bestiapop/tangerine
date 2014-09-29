@@ -74,7 +74,7 @@ class Utils:
                         lista.append(lema)
         return lista
 
-    def plot(self, negativeDic, n_groups, filename):
+    def plot(self, negativeDic, n_groups, filename, totalwords):
         xvalues = [seq[0] for seq in negativeDic][:n_groups]
         values = [seq[1] for seq in negativeDic][:n_groups]
         n_groups = min(n_groups, len(xvalues))
@@ -84,16 +84,19 @@ class Utils:
         bar_width = 0.35
         opacity = 0.4
         error_config = {'ecolor': '0.3'}
-        plt.bar(index, values, bar_width, alpha=opacity, color='b',
+        rect1 = plt.bar(index, values, bar_width, alpha=opacity, color='b',
             error_kw=error_config, label='Comentario')
         ax.set_xticklabels(xvalues, rotation=45)
         plt.xlabel('Comment')
         plt.ylabel('#Comments')
         plt.title('Top words')
         plt.xticks(index + bar_width / 2, xvalues)
-        #index +bar_width
-        #plt.legend()
-        ax.set_ylim(0, ysize + 3)
+        for rect in rect1:
+            height = rect.get_height()
+            ax.text(rect.get_x() + rect.get_width() / 2., 1.02 * height,
+                '%.3f' % (float(height) / totalwords), ha='center', va='bottom',
+                rotation=45)
+        ax.set_ylim(0, ysize * 1.05)
         plt.tight_layout()
         fig.savefig(self.__dir_images + filename, dpi=90)
         plt.show()
@@ -234,17 +237,18 @@ def main():
     for positive in positiveI:
         print '\t' + positive
 
+    totalwords = len(allWords)
     # Graphs
     # A (Dina suggest)
-    utils.plot(allWordsSorted, 20, 'AllWords.png')
+    utils.plot(allWordsSorted, 20, 'AllWords.png', totalwords)
 
     # B (Dina suggest)
-    utils.plot(mydicnegSorted, 20, 'NegativeWords.png')
-    utils.plot(mydicposSorted, 20, 'PositiveWords.png')
+    utils.plot(mydicnegSorted, 20, 'NegativeWords.png', totalwords)
+    utils.plot(mydicposSorted, 20, 'PositiveWords.png', totalwords)
 
     # C (Dina suggest)
-    utils.plot(dicNegC[:100], 20, 'NegativeSubjetive.png')
-    utils.plot(dicPosC[:100], 20, 'PositiveSubjetiveWords.png')
+    utils.plot(dicNegC[:100], 20, 'NegativeSubjetive.png', totalwords)
+    utils.plot(dicPosC[:100], 20, 'PositiveSubjetiveWords.png', totalwords)
 
 if __name__ == "__main__":
     main()
