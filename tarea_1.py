@@ -180,8 +180,10 @@ class Utils:
         data.close
 
     def clean(self):
-        os.remove(self.__infile)
-        os.remove(self.__outfile)
+        if os.path.exists(self.__infile):
+            os.remove(self.__infile)
+        if os.path.exists(self.__outfile):
+            os.remove(self.__outfile)
 
 
 def main():
