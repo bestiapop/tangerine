@@ -9,6 +9,8 @@ import re
 import numpy as np
 import matplotlib.pyplot as plt
 import getopt
+import socket
+from sys import version
 #excel api
 from openpyxl import load_workbook
 from webservice import WebService
@@ -20,10 +22,8 @@ class Utils:
     # CONFIG ARGS
     __host = 'localhost'
     __port = '50005'
-    __infile = 'temp_file'
-    __outfile = 'data_file'
     __dir_images = 'figures/'
-    __xls_range = 'G3:H875'
+    __xls_range = 'G3:H875' #'G31:H31' 
     __res = 'res/'
 
     # files to load
@@ -32,11 +32,24 @@ class Utils:
     __stopwords_file = __resources + 'stopwords.txt'
     __listaElem_file = __resources + 'listasElementosSubjetivos.pl'
 
+    # socket
     def __init__(self):
         if not os.path.exists(self.__dir_images):
             os.makedirs(self.__dir_images)
         if not os.path.exists(self.__res):
             os.makedirs(self.__res)
+        #socket
+        self.encoding = 'UTF-8'
+        self.BUFSIZE = 1000240
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(None)
+        self.socket.connect((self.__host, int(self.__port)))
+        #self.encoding = encoding
+        self.socket.sendall('RESET_STATS\0')
+        r = self.socket.recv(self.BUFSIZE)
+
+        if not r.strip('\0') == 'FL-SERVER-READY':
+            raise Exception("Server not ready")
         pass
 
     def parse(self, word):
@@ -61,16 +74,33 @@ class Utils:
         temp.close
 
     def lematization_freeling_client(self, comment, stopwords):
-        self.tmpFile(comment)
-        command = 'analyzer_client ' + self.__host + ':' + self.__port \
-            + '<' + self.__infile + ' >' + self.__outfile
-        os.system(command)
+        send = comment + '\n\0'
+        self.socket.sendall(send.encode("UTF-8",'strict'))
 
+        done = False
+        while not done:
+            data = b""
+            while not data:
+                buffer = self.socket.recv(self.BUFSIZE)
+
+                if buffer[-1] == '\0':
+                    data += buffer[:-1]
+                    done = True
+                    break
+                else:
+                    data += buffer
+
+	#print data
+        data = data.rstrip('\x00')
+        data = data.split('\n')
+
+	#print data
         lista = []
-        with open(self.__outfile) as data:
-            for words in data:
-                if words.rstrip():
-                    args = words.split()
+
+        for words in data:
+            if words.rstrip():
+                args = words.split()
+                if len(args) > 1:
                     lema = args[1]
                     tag = args[2]
                     if not re.match(r"^F.*", tag) and \
@@ -79,6 +109,21 @@ class Utils:
                         lema = unicode(lema, "UTF-8")
                         lista.append(lema)
         return lista
+
+    def u(self, s, encoding='utf-8', errors='strict'):
+        #ensure s is properly unicode.. wrapper for python 2.6/2.7,
+        if version < '3':
+        #ensure the object is unicode
+            if isinstance(s, unicode):
+                return s
+            else:
+                return unicode(s, encoding, errors=errors)
+        else:
+        #will work on byte arrays
+            if isinstance(s, str):
+                return s
+            else:
+                return str(s, encoding, errors=errors)
 
     def plot(self, negativeDic, n_groups, filename, totalwords):
         if negativeDic:
@@ -179,12 +224,6 @@ class Utils:
         data.write(save)
         data.close
 
-    def clean(self):
-        if os.path.exists(self.__infile):
-            os.remove(self.__infile)
-        if os.path.exists(self.__outfile):
-            os.remove(self.__outfile)
-
 
 def main():
     ws = False
@@ -212,8 +251,11 @@ def main():
 
     negComm = 0
     numComm = len(cell_range)
+    it = 0
     # Iteration over cell_range
     for rows in cell_range:
+        #print it
+        it = it + 1
         (valor, key) = rows
         if key.value < 3:
             insert = mydicneg
@@ -295,9 +337,6 @@ def main():
     utils.generateData(allWordsSorted, 'allWords.csv')
     utils.generateStatisticData(allWordsSorted, mydicposSorted, mydicnegSorted,
         numComm, negComm)
-
-    # clean tmp files
-    utils.clean()
 
 
 if __name__ == "__main__":
