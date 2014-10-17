@@ -1,6 +1,6 @@
 #EJECUTANDO
 	## iniciamos el servidor freeling
-	analyze -f ./config/es.cfg --server --port 50005 &
+	analyze -f ./config/es.cfg --flush --server --port 50005 &
 
 	## ejecutamos la tarea
 	./tarea_1.py
