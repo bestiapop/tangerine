@@ -375,37 +375,37 @@ def main():
     posWords = [word for (word, val) in mydicposSorted]
     negWords = [word for (word, val) in mydicnegSorted]
 
-    return (posWords, negWords)
+    return (posWords, negWords, list(positiveI), list(negativeI))
 
 
 if __name__ == "__main__":
-    (posWords, negWords) = main()
+    (posWords, negWords, posI, negI) = main()
     classify = Clasificator()
     comments = classify.loadComments()
-    (train, test) = classify.get_train_test_set(len(comments), 0.7)
+    (train, test) = classify.load_train_test_set()
 
-    N = 50
+    N = 20
     train_set = []
     for i in train:
         (com, value) = comments[i]
         if value < 3:
-            train_set.append((classify.feature(N, com.split(), posWords, negWords),"neg"))
+            train_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"neg"))
         elif value > 3:
-            train_set.append((classify.feature(N, com.split(), posWords, negWords),"pos"))
+            train_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"pos"))
 
     #print train_set
     classifier = nltk.NaiveBayesClassifier.train(train_set)
 
     for i in test:
         (com, value) = comments[i]
-        print classifier.classify(classify.feature(N, com.split(), posWords, negWords)) + "  %d" % value
+        print classifier.classify(classify.feature(N, com.split(), posWords, negWords, posI, negI)) + "  %d" % value
 
     dev_set = []
     for i in test:
         (com, value) = comments[i]
         if value < 3:
-            dev_set.append((classify.feature(N, com.split(), posWords, negWords),"neg"))
+            dev_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"neg"))
         elif value > 3:
-            dev_set.append((classify.feature(N, com.split(), posWords, negWords),"pos"))
+            dev_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"pos"))
 
     print(nltk.classify.accuracy(classifier, dev_set))
