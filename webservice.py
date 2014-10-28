@@ -26,10 +26,10 @@ class WebService:
         for item in result.item:
             if item.key == "output_url":
                 rfile = item.value
-                urllib.urlretrieve(rfile, "tmp_file")
+                urllib.urlretrieve(rfile, "temp_file")
 
         ret = []
-        with open("tmp_file") as tmp_file:
+        with open("temp_file") as tmp_file:
             for line in tmp_file:
                 if line.rstrip():
                     (word, lema, tag, _, _, _) = line.split()  # unification

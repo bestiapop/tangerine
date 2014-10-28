@@ -3,6 +3,7 @@
 
 from openpyxl import load_workbook
 import sys
+import re
 import random
 
 
@@ -43,28 +44,43 @@ class Clasificator:
         with open(self.__test_file, 'w') as save:
             save.write("\n".join(test))
 
-    def feature(self, N, comment, positive, negative, posSub, negSub):
+    def feature(self, N, pcomment, comment, positive, negative, posSub, negSub):
         """Lista de lemas en comment que corresponden al comentario a ser
      analizado. con las N palabras positivas y negativas, clasificamos con el
      feature positive(n):[True, False] si la palabra positiva n se encuentra en
      el comentario, analogo para negative."""
         features = {}
+        # custom feature
+        cant_pos = 0
+        cant_neg = 0
         # features top N
         for i in range(0, N - 1):
             if positive[i] in comment:
-                features["positive(%d)" % i] = True
+                features["positive(%s)" % positive[i]] = True
+                cant_pos = cant_pos + 1
             else:
-                features["positive(%d)" % i] = False
+                features["positive(%s)" % positive[i]] = False
             if negative[i] in comment:
-                features["negative(%d)" % i] = True
+                features["negative(%s)" % negative[i]] = True
+                cant_neg = cant_neg + 1
             else:
-                features["negative(%d)" % i] = False
+                features["negative(%s)" % negative[i]] = False
         # features subjetive lists
         for word in comment:
             if word in posSub:
-                features["positive(%s)" % word] = comment.count(word)
-            elif word in negSub:
-                features["negative(%s)" % word] = comment.count(word)
+                features["subjetive_pos(%s)" % word] = comment.count(word)
+            if word in negSub: #elif
+                features["subjetive_neg(%s)" % word] = comment.count(word)
+
+        #custom features
+        if self.generateHeuristic(pcomment):
+            features["no_gusto"] = True
+        #features["custom_pos"] = cant_pos
+        #features["custom_neg"] = cant_neg
+        #if cant_pos > 2:
+        #    features["custom_pos"] = 2
+        #if cant_neg > 2:
+        #    features["custom_neg"] = 2
 
         return features
 
@@ -93,8 +109,18 @@ class Clasificator:
         load_test.close
         return (train_list, test_list)
 
+    def generateHeuristic(self, com):
+        heu = ["gusto", "gustó", "vi", "ví"]
+        for elem in heu:
+            reg = r".*no (\w+) %s.*" % elem
+            if re.match(reg, com, re.IGNORECASE):
+                return True
+        return False
 
 if __name__ == "__main__":
     c = Clasificator()
-    comments =  c.loadComments()
-    c.generate_train_set(len(comments), 0.7)
+    #comments =  c.loadComments()
+    #c.generate_train_set(len(comments), 0.7)
+
+    com = "sd no ja gusto esa basura."
+    print c.generateHeuristic(com)

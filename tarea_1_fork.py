@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import getopt
 import socket
 import nltk
+import errno
+import collections
 from sys import version
 #excel api
 from openpyxl import load_workbook
@@ -25,7 +27,7 @@ class Utils:
     __host = 'localhost'
     __port = '50005'
     __dir_images = 'figures/'
-    __xls_range = 'G3:H845'  # 'G3:H875' #'G31:H31'
+    __xls_range = 'G3:H875'  # 'G3:H875' #'G31:H31'
     __res = 'res/'
 
     # files to load
@@ -46,14 +48,20 @@ class Utils:
         self.BUFSIZE = 1000240
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(None)
-        self.socket.connect((self.__host, int(self.__port)))
-        #self.encoding = encoding
-        self.socket.sendall('RESET_STATS\0')
-        r = self.socket.recv(self.BUFSIZE)
+        try:
+            self.socket.connect((self.__host, int(self.__port)))
+            #self.encoding = encoding
+            self.socket.sendall('RESET_STATS\0')
+            r = self.socket.recv(self.BUFSIZE)
 
-        if not r.strip('\0') == 'FL-SERVER-READY':
-            raise Exception("Server not ready")
-        pass
+            if not r.strip('\0') == 'FL-SERVER-READY':
+                raise Exception("Server not ready")
+            pass
+        except socket.error, v:
+            errorcode = v[0]
+            if errorcode == errno.ECONNREFUSED:
+                print 'Error conexion servidor.'
+                sys.exit()
 
     def setDisplay(self, Display):
         self.__Display = Display
@@ -275,6 +283,7 @@ def main():
     (positiveWords, negativeWords) = utils.loadSubjetiveElems()
     domain = utils.loadDomain()
 
+    tokenizedComm = {}
     negComm = 0
     numComm = len(cell_range)
     it = 0
@@ -295,6 +304,7 @@ def main():
                 lista = utils.lematization_freeling_client(valor.value,
                     stopwords, domain)
 
+            tokenizedComm[it - 1] = lista
             list_aux = []
 
             for word in lista:
@@ -375,11 +385,11 @@ def main():
     posWords = [word for (word, val) in mydicposSorted]
     negWords = [word for (word, val) in mydicnegSorted]
 
-    return (posWords, negWords, list(positiveI), list(negativeI))
+    return (posWords, negWords, list(positiveI), list(negativeI), tokenizedComm)
 
 
 if __name__ == "__main__":
-    (posWords, negWords, posI, negI) = main()
+    (posWords, negWords, posI, negI, tokenizedComm) = main()
     classify = Clasificator()
     comments = classify.loadComments()
     (train, test) = classify.load_train_test_set()
@@ -389,23 +399,72 @@ if __name__ == "__main__":
     for i in train:
         (com, value) = comments[i]
         if value < 3:
-            train_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"neg"))
+            splitted = tokenizedComm[i]
+            train_set.append((classify.feature(N, com, splitted, posWords,
+                negWords, posI, negI), "neg"))
         elif value > 3:
-            train_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"pos"))
+            splitted = tokenizedComm[i]
+            train_set.append((classify.feature(N, com, splitted, posWords,
+                negWords, posI, negI), "pos"))
 
     #print train_set
     classifier = nltk.NaiveBayesClassifier.train(train_set)
 
-    for i in test:
-        (com, value) = comments[i]
-        print classifier.classify(classify.feature(N, com.split(), posWords, negWords, posI, negI)) + "  %d" % value
+    # Para testing se han excluido comentarios con puntuacion 3, es decir
+    # se evaluan comentarios positivos y negativos.
+
+    #for i in test:
+    #    (com, value) = comments[i]
+    #    if value != 3:
+    #        splitted = tokenizedComm[i]
+    #        print classifier.classify(classify.feature(N, splitted, posWords,
+    #            negWords, posI, negI)) + "  %d" % value
 
     dev_set = []
+    errorComments = []
+    refset = collections.defaultdict(set)
+    testset = collections.defaultdict(set)
+    it = 0
     for i in test:
         (com, value) = comments[i]
-        if value < 3:
-            dev_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"neg"))
-        elif value > 3:
-            dev_set.append((classify.feature(N, com.split(), posWords, negWords, posI, negI),"pos"))
+        if value != 3:
+            it = it + 1
+            splitted = tokenizedComm[i]
+            evaluate = classify.feature(N, com, splitted, posWords, negWords,
+                posI, negI)
+            if value < 3:
+                dev_set.append((evaluate, "neg"))
+                refset["neg"].add(it)
+            else:
+                dev_set.append((evaluate, "pos"))
+                refset["pos"].add(it)
+            res = classifier.classify(evaluate)
+            testset[res].add(it)
 
-    print(nltk.classify.accuracy(classifier, dev_set))
+            if res == "neg":
+                if value < 3:
+                    message = "OK"
+                else:
+                    message = "ERROR"
+            else:
+                if value > 3:
+                    message = "OK"
+                else:
+                    message = "ERROR"
+
+            if(message == "ERROR"):
+                errorComments.append((com, value))
+            #print  res + "  %d  " % value + message
+
+    #for (c, v) in errorComments:
+    #    if v < 3:
+    #        print v, c
+    #        print "\n"
+    #print errorComments[0]
+    classifier.show_most_informative_features(50)
+
+    print 'Accuracy:', nltk.classify.accuracy(classifier, dev_set)
+    print 'Precision Pos:', nltk.metrics.precision(refset['pos'], testset['pos'])
+    print 'Recall Pos:', nltk.metrics.recall(refset['pos'], testset['pos'])
+    print 'Precision Neg:', nltk.metrics.precision(refset['neg'], testset['neg'])
+    print 'Recall Neg:', nltk.metrics.recall(refset['neg'], testset['neg'])
