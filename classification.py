@@ -5,6 +5,9 @@ from openpyxl import load_workbook
 import sys
 import re
 import random
+import collections
+import nltk
+from nltk.metrics import ConfusionMatrix
 
 
 class Clasificator:
@@ -15,6 +18,8 @@ class Clasificator:
         self.__comment_file = self.__resources + 'Comentarios_Peliculas.xlsx'
         self.__train_file = './resources/train.txt'
         self.__test_file = './resources/test.txt'
+        self. __res = 'res/'
+
         pass
 
     def loadComments(self):
@@ -69,7 +74,7 @@ class Clasificator:
         for word in comment:
             if word in posSub:
                 features["subjetive_pos(%s)" % word] = comment.count(word)
-            if word in negSub: #elif
+            if word in negSub:
                 features["subjetive_neg(%s)" % word] = comment.count(word)
 
         #custom features
@@ -117,10 +122,99 @@ class Clasificator:
                 return True
         return False
 
+    def saveMetrics(self, toSave):
+        saveFile = open(self.__res + 'Metrics.txt', 'w')
+        save = ''
+        for k in sorted(toSave.keys()):
+            save = save + k + ' : ' + str(toSave[k]) + '\n'
+        saveFile.write(save)
+        saveFile.close
+
+    def process(self, posWords, negWords, posI, negI, tokenizedComm):
+        comments = self.loadComments()
+        (train, test) = self.load_train_test_set()
+
+        N = 20
+        train_set = []
+        for i in train:
+            (com, value) = comments[i]
+            if value < 3:
+                splitted = tokenizedComm[i]
+                train_set.append((self.feature(N, com, splitted, posWords,
+                    negWords, posI, negI), "neg"))
+            elif value > 3:
+                splitted = tokenizedComm[i]
+                train_set.append((self.feature(N, com, splitted, posWords,
+                    negWords, posI, negI), "pos"))
+
+        classifier = nltk.NaiveBayesClassifier.train(train_set)
+
+        # Para testing se han excluido comentarios con puntuacion 3, es decir
+        # se evaluan comentarios positivos y negativos.
+
+        dev_set = []
+        errorComments = []
+        refset = collections.defaultdict(set)
+        testset = collections.defaultdict(set)
+        ref_list = []
+        test_list = []
+
+        it = 0
+        for i in test:
+            (com, value) = comments[i]
+            if value != 3:
+                it = it + 1
+                splitted = tokenizedComm[i]
+                evaluate = self.feature(N, com, splitted, posWords, negWords,
+                    posI, negI)
+                if value < 3:
+                    dev_set.append((evaluate, "neg"))
+                    refset["neg"].add(it)
+                    ref_list.append("neg")
+                else:
+                    dev_set.append((evaluate, "pos"))
+                    refset["pos"].add(it)
+                    ref_list.append("pos")
+                res = classifier.classify(evaluate)
+                testset[res].add(it)
+                test_list.append(res)
+                if res == "neg":
+                    if value < 3:
+                        message = "OK"
+                    else:
+                        message = "ERROR"
+                else:
+                    if value > 3:
+                        message = "OK"
+                    else:
+                        message = "ERROR"
+
+                if(message == "ERROR"):
+                    errorComments.append((com, value))
+
+        classifier.show_most_informative_features(50)
+
+        # confusion matrix
+        cm = ConfusionMatrix(ref_list, test_list)
+        cm = '\n' + cm.pp(sort_by_count=True, show_percents=True, truncate=9)
+
+        # data metrics
+        accuracy = nltk.classify.accuracy(classifier, dev_set)
+        pPos = nltk.metrics.precision(refset['pos'], testset['pos'])
+        rPos = nltk.metrics.recall(refset['pos'], testset['pos'])
+        pNeg = nltk.metrics.precision(refset['neg'], testset['neg'])
+        rNeg = nltk.metrics.recall(refset['neg'], testset['neg'])
+        Metrics = {'Accuracy': accuracy,
+            'Precision Pos': pPos,
+            'Recall Pos': rPos,
+            'Precision Neg': pNeg,
+            'Recall Neg': rNeg,
+            'Confusion Matrix': cm}
+
+        for m in sorted(Metrics.keys()):
+            print m, Metrics[m]
+
+        self.saveMetrics(Metrics)
+
 if __name__ == "__main__":
     c = Clasificator()
-    #comments =  c.loadComments()
-    #c.generate_train_set(len(comments), 0.7)
-
-    com = "sd no ja gusto esa basura."
-    print c.generateHeuristic(com)

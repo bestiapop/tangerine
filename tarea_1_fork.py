@@ -12,7 +12,6 @@ import getopt
 import socket
 import nltk
 import errno
-import collections
 from sys import version
 #excel api
 from openpyxl import load_workbook
@@ -27,7 +26,7 @@ class Utils:
     __host = 'localhost'
     __port = '50005'
     __dir_images = 'figures/'
-    __xls_range = 'G3:H875'  # 'G3:H875' #'G31:H31'
+    __xls_range = 'G3:H875'
     __res = 'res/'
 
     # files to load
@@ -231,10 +230,11 @@ class Utils:
             sys.exit(0)
         return (positiveWords, negativeWords)
 
-    """Dado una lista de palabras, las guarda en un archivo con el nombre
-    filename, el objetivo de esto es obtener datos estadisticos para realizar
-    el informe"""
     def generateData(self, allWords, filename):
+        """Dado una lista de palabras, las guarda en un archivo con el nombre
+        filename, el objetivo de esto es obtener datos estadisticos para
+        realizar el informe"""
+
         saveAll = open(self.__res + filename, "w")
         save = ''
         for (lema, frec) in allWords:
@@ -256,215 +256,141 @@ class Utils:
         data.write(save)
         data.close
 
+    def process(self):
+        ws = False
+        #utils = Utils()
+        self.setDisplay(False)
+        webService = None
+        try:
+            opts, args = getopt.getopt(sys.argv[1:], "w", [])
+        except getopt.GetoptError:
+            print 'Invalid arguments'
+            sys.exit(2)
+        for opt, arg in opts:
+            if opt == '-w':
+                print 'Webservice Mode'
+                ws = True
+                webService = WebService()
 
-def main():
-    ws = False
-    utils = Utils()
-    utils.setDisplay(False)
-    webService = None
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "w", [])
-    except getopt.GetoptError:
-        print 'Invalid arguments'
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-w':
-            print 'Webservice Mode'
-            ws = True
-            webService = WebService()
+        # used structures
+        mydicneg = {}
+        mydicpos = {}
+        allWords = {}
 
-    # used structures
-    mydicneg = {}
-    mydicpos = {}
-    allWords = {}
+        cell_range = self.loadXLSFile()
+        stopwords = self.loadStopwords()
+        (positiveWords, negativeWords) = self.loadSubjetiveElems()
+        domain = self.loadDomain()
 
-    cell_range = utils.loadXLSFile()
-    stopwords = utils.loadStopwords()
-    (positiveWords, negativeWords) = utils.loadSubjetiveElems()
-    domain = utils.loadDomain()
+        tokenizedComm = {}
+        negComm = 0
+        numComm = len(cell_range)
+        it = 0
+        for rows in cell_range:
+            it = it + 1
+            (valor, key) = rows
+            if key.value != 3:
+                if key.value < 3:
+                    insert = mydicneg
+                    negComm = negComm + 1
+                else:
+                    insert = mydicpos
+                #lematize and filter F words
+                if ws:
+                    lista = webService.lematization_freeling_ws(valor.value,
+                        stopwords)
+                else:
+                    lista = self.lematization_freeling_client(valor.value,
+                        stopwords, domain)
 
-    tokenizedComm = {}
-    negComm = 0
-    numComm = len(cell_range)
-    it = 0
-    for rows in cell_range:
-        it = it + 1
-        (valor, key) = rows
-        if key.value != 3:
-            if key.value < 3:
-                insert = mydicneg
-                negComm = negComm + 1
-            else:
-                insert = mydicpos
-            #lematize and filter F words
-            if ws:
-                lista = webService.lematization_freeling_ws(valor.value,
-                    stopwords)
-            else:
-                lista = utils.lematization_freeling_client(valor.value,
-                    stopwords, domain)
+                tokenizedComm[it - 1] = lista
+                list_aux = []
 
-            tokenizedComm[it - 1] = lista
-            list_aux = []
+                for word in lista:
+                    if not word in allWords.keys():
+                        allWords[word] = 0
+                    if not word in insert.keys():
+                        insert[word] = 0
+                    if word not in list_aux:
+                        insert[word] = insert[word] + 1
+                        allWords[word] = allWords[word] + 1
 
-            for word in lista:
-                if not word in allWords.keys():
-                    allWords[word] = 0
-                if not word in insert.keys():
-                    insert[word] = 0
-                if word not in list_aux:
-                    insert[word] = insert[word] + 1
-                    allWords[word] = allWords[word] + 1
+        # ordering the dic (<)
+        mydicnegSorted = sorted(mydicneg.iteritems(),
+            key=operator.itemgetter(1), reverse=True)
+        mydicposSorted = sorted(mydicpos.iteritems(),
+            key=operator.itemgetter(1), reverse=True)
+        allWordsSorted = sorted(allWords.iteritems(),
+            key=operator.itemgetter(1), reverse=True)
 
-    # ordering the dic (<)
-    mydicnegSorted = sorted(mydicneg.iteritems(), key=operator.itemgetter(1),
-        reverse=True)
-    mydicposSorted = sorted(mydicpos.iteritems(), key=operator.itemgetter(1),
-        reverse=True)
-    allWordsSorted = sorted(allWords.iteritems(), key=operator.itemgetter(1),
-        reverse=True)
+        mydicnegList = [seq[0] for seq in mydicnegSorted][:100]
+        mydicposList = [seq[0] for seq in mydicposSorted][:100]
 
-    mydicnegList = [seq[0] for seq in mydicnegSorted][:100]
-    mydicposList = [seq[0] for seq in mydicposSorted][:100]
+        # intersection
+        negativeI = set(mydicnegList).intersection(negativeWords.keys())
+        positiveI = set(mydicposList).intersection(positiveWords.keys())
 
-    # intersection
-    negativeI = set(mydicnegList).intersection(negativeWords.keys())
-    positiveI = set(mydicposList).intersection(positiveWords.keys())
+        #for graph c
+        dicPosC = {}
+        dicNegC = {}
 
-    #for graph c
-    dicPosC = {}
-    dicNegC = {}
+        # Transform intersection to dictionary
+        for pos in positiveI:
+            dicPosC[pos] = mydicpos[pos]
 
-    # Transform intersection to dictionary
-    for pos in positiveI:
-        dicPosC[pos] = mydicpos[pos]
+        for neg in negativeI:
+            dicNegC[neg] = mydicneg[neg]
 
-    for neg in negativeI:
-        dicNegC[neg] = mydicneg[neg]
+        dicNegC = sorted(dicNegC.iteritems(), key=operator.itemgetter(1),
+            reverse=True)
+        dicPosC = sorted(dicPosC.iteritems(), key=operator.itemgetter(1),
+            reverse=True)
 
-    dicNegC = sorted(dicNegC.iteritems(), key=operator.itemgetter(1),
-        reverse=True)
-    dicPosC = sorted(dicPosC.iteritems(), key=operator.itemgetter(1),
-        reverse=True)
+        # Print top 100 positive and negative Words
+        print '\033[1m\033[31m' + 'Negative Words' + '\033[0m'
+        for negative in negativeI:
+            print '\t' + negative
 
-    # Print top 100 positive and negative Words
-    print '\033[1m\033[31m' + 'Negative Words' + '\033[0m'
-    for negative in negativeI:
-        print '\t' + negative
+        print '\n' + '\033[1m\033[32m' + 'Positive Words' + '\033[0m'
+        for positive in positiveI:
+            print '\t' + positive
 
-    print '\n' + '\033[1m\033[32m' + 'Positive Words' + '\033[0m'
-    for positive in positiveI:
-        print '\t' + positive
+        totalwords = len(allWords)
 
-    totalwords = len(allWords)
-    # Graphs
-    # A (Dina suggest)
-    top = 50
-    utils.plot(allWordsSorted, top, 'AllWords.png', totalwords)
+        # Graphs
+        # A (Dina suggest)
+        top = 50
+        self.plot(allWordsSorted, top, 'AllWords.png', totalwords)
 
-    # B (Dina suggest)
-    utils.plot(mydicnegSorted, top, 'NegativeWords.png', totalwords)
-    utils.plot(mydicposSorted, top, 'PositiveWords.png', totalwords)
+        # B (Dina suggest)
+        self.plot(mydicnegSorted, top, 'NegativeWords.png', totalwords)
+        self.plot(mydicposSorted, top, 'PositiveWords.png', totalwords)
 
-    # C (Dina suggest)
-    utils.plot(dicNegC[:100], top, 'NegativeSubjetive.png', totalwords)
-    utils.plot(dicPosC[:100], top, 'PositiveSubjetiveWords.png', totalwords)
+        # C (Dina suggest)
+        self.plot(dicNegC[:100], top, 'NegativeSubjetive.png', totalwords)
+        self.plot(dicPosC[:100], top, 'PositiveSubjetiveWords.png', totalwords)
 
-    # Statistic data
-    utils.generateData(mydicnegSorted, 'negativeWords.csv')
-    utils.generateData(mydicposSorted, 'positiveWords.csv')
-    utils.generateData(allWordsSorted, 'allWords.csv')
-    utils.generateStatisticData(allWordsSorted, mydicposSorted, mydicnegSorted,
-        numComm, negComm)
+        # Statistic data
+        self.generateData(mydicnegSorted, 'negativeWords.csv')
+        self.generateData(mydicposSorted, 'positiveWords.csv')
+        self.generateData(allWordsSorted, 'allWords.csv')
+        self.generateStatisticData(allWordsSorted, mydicposSorted,
+            mydicnegSorted, numComm, negComm)
 
-    print '\033[1m\033[31m' + 'Words All' + '\033[0m'
-    for w in allWordsSorted[:100]:
-        print w
+        print '\033[1m\033[31m' + 'Words All' + '\033[0m'
+        for w in allWordsSorted[:100]:
+            print w
 
-    # Wrapping
-    posWords = [word for (word, val) in mydicposSorted]
-    negWords = [word for (word, val) in mydicnegSorted]
+        # Wrapping
+        posWords = [word for (word, val) in mydicposSorted]
+        negWords = [word for (word, val) in mydicnegSorted]
 
-    return (posWords, negWords, list(positiveI), list(negativeI), tokenizedComm)
+        return (posWords, negWords, list(positiveI), list(negativeI),
+            tokenizedComm)
 
 
 if __name__ == "__main__":
-    (posWords, negWords, posI, negI, tokenizedComm) = main()
+    utils = Utils()
     classify = Clasificator()
-    comments = classify.loadComments()
-    (train, test) = classify.load_train_test_set()
-
-    N = 20
-    train_set = []
-    for i in train:
-        (com, value) = comments[i]
-        if value < 3:
-            splitted = tokenizedComm[i]
-            train_set.append((classify.feature(N, com, splitted, posWords,
-                negWords, posI, negI), "neg"))
-        elif value > 3:
-            splitted = tokenizedComm[i]
-            train_set.append((classify.feature(N, com, splitted, posWords,
-                negWords, posI, negI), "pos"))
-
-    #print train_set
-    classifier = nltk.NaiveBayesClassifier.train(train_set)
-
-    # Para testing se han excluido comentarios con puntuacion 3, es decir
-    # se evaluan comentarios positivos y negativos.
-
-    #for i in test:
-    #    (com, value) = comments[i]
-    #    if value != 3:
-    #        splitted = tokenizedComm[i]
-    #        print classifier.classify(classify.feature(N, splitted, posWords,
-    #            negWords, posI, negI)) + "  %d" % value
-
-    dev_set = []
-    errorComments = []
-    refset = collections.defaultdict(set)
-    testset = collections.defaultdict(set)
-    it = 0
-    for i in test:
-        (com, value) = comments[i]
-        if value != 3:
-            it = it + 1
-            splitted = tokenizedComm[i]
-            evaluate = classify.feature(N, com, splitted, posWords, negWords,
-                posI, negI)
-            if value < 3:
-                dev_set.append((evaluate, "neg"))
-                refset["neg"].add(it)
-            else:
-                dev_set.append((evaluate, "pos"))
-                refset["pos"].add(it)
-            res = classifier.classify(evaluate)
-            testset[res].add(it)
-
-            if res == "neg":
-                if value < 3:
-                    message = "OK"
-                else:
-                    message = "ERROR"
-            else:
-                if value > 3:
-                    message = "OK"
-                else:
-                    message = "ERROR"
-
-            if(message == "ERROR"):
-                errorComments.append((com, value))
-            #print  res + "  %d  " % value + message
-
-    #for (c, v) in errorComments:
-    #    if v < 3:
-    #        print v, c
-    #        print "\n"
-    #print errorComments[0]
-    classifier.show_most_informative_features(50)
-
-    print 'Accuracy:', nltk.classify.accuracy(classifier, dev_set)
-    print 'Precision Pos:', nltk.metrics.precision(refset['pos'], testset['pos'])
-    print 'Recall Pos:', nltk.metrics.recall(refset['pos'], testset['pos'])
-    print 'Precision Neg:', nltk.metrics.precision(refset['neg'], testset['neg'])
-    print 'Recall Neg:', nltk.metrics.recall(refset['neg'], testset['neg'])
+    (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
+    classify.process(posWords, negWords, posI, negI, tokenizedComm)
