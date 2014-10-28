@@ -10,7 +10,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import getopt
 import socket
-import nltk
 import errno
 from sys import version
 #excel api
@@ -34,10 +33,12 @@ class Utils:
     __comment_file = __resources + 'Comentarios_Peliculas.xlsx'
     __stopwords_file = __resources + 'stopwords.txt'
     __listaElem_file = __resources + 'listasElementosSubjetivos.pl'
-    __Display = False
 
     # socket
-    def __init__(self):
+    def __init__(self, Display=False, WS=False, Exc=3):
+        self.Display = Display
+        self.ws = WS
+        self.Exc = Exc
         if not os.path.exists(self.__dir_images):
             os.makedirs(self.__dir_images)
         if not os.path.exists(self.__res):
@@ -61,9 +62,6 @@ class Utils:
             if errorcode == errno.ECONNREFUSED:
                 print 'Error conexion servidor.'
                 sys.exit()
-
-    def setDisplay(self, Display):
-        self.__Display = Display
 
     def parse(self, word):
         word = re.sub("á", u"á", word)
@@ -165,7 +163,7 @@ class Utils:
             ax.set_ylim(0, ysize * 1.05)
             plt.tight_layout()
             fig.savefig(self.__dir_images + filename, dpi=90)
-            if self.__Display:
+            if self.Display:
                 plt.show()
 
     def loadXLSFile(self):
@@ -257,20 +255,8 @@ class Utils:
         data.close
 
     def process(self):
-        ws = False
-        #utils = Utils()
-        self.setDisplay(False)
-        webService = None
-        try:
-            opts, args = getopt.getopt(sys.argv[1:], "w", [])
-        except getopt.GetoptError:
-            print 'Invalid arguments'
-            sys.exit(2)
-        for opt, arg in opts:
-            if opt == '-w':
-                print 'Webservice Mode'
-                ws = True
-                webService = WebService()
+        if self.ws:
+            webService = WebService()
 
         # used structures
         mydicneg = {}
@@ -289,7 +275,7 @@ class Utils:
         for rows in cell_range:
             it = it + 1
             (valor, key) = rows
-            if key.value != 3:
+            if key.value != self.Exc:
                 if key.value < 3:
                     insert = mydicneg
                     negComm = negComm + 1
@@ -390,7 +376,23 @@ class Utils:
 
 
 if __name__ == "__main__":
-    utils = Utils()
-    classify = Clasificator()
+    display = False
+    ws = False
+    # to exclude comments with value=3 =>exc=3, else exc=0
+    exc = 3
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "wd", [])
+    except getopt.GetoptError:
+        print 'Invalid arguments'
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == '-w':
+            print 'Webservice Mode'
+            ws = True
+        elif opt == "-d":
+            display = True
+
+    utils = Utils(Display=display, WS=ws, Exc=exc)
+    classify = Clasificator(Exc=exc)
     (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
     classify.process(posWords, negWords, posI, negI, tokenizedComm)

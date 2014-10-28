@@ -12,14 +12,14 @@ from nltk.metrics import ConfusionMatrix
 
 class Clasificator:
 
-    def __init__(self):
+    def __init__(self, Exc=3):
         self.__xls_range = 'G3:H875'
         self.__resources = './resources/'
         self.__comment_file = self.__resources + 'Comentarios_Peliculas.xlsx'
         self.__train_file = './resources/train.txt'
         self.__test_file = './resources/test.txt'
         self. __res = 'res/'
-
+        self.Exc = Exc
         pass
 
     def loadComments(self):
@@ -138,14 +138,15 @@ class Clasificator:
         train_set = []
         for i in train:
             (com, value) = comments[i]
-            if value < 3:
-                splitted = tokenizedComm[i]
-                train_set.append((self.feature(N, com, splitted, posWords,
-                    negWords, posI, negI), "neg"))
-            elif value > 3:
-                splitted = tokenizedComm[i]
-                train_set.append((self.feature(N, com, splitted, posWords,
-                    negWords, posI, negI), "pos"))
+            if value != self.Exc:
+                if value < 3:
+                    splitted = tokenizedComm[i]
+                    train_set.append((self.feature(N, com, splitted, posWords,
+                        negWords, posI, negI), "neg"))
+                else:
+                    splitted = tokenizedComm[i]
+                    train_set.append((self.feature(N, com, splitted, posWords,
+                        negWords, posI, negI), "pos"))
 
         classifier = nltk.NaiveBayesClassifier.train(train_set)
 
@@ -162,7 +163,7 @@ class Clasificator:
         it = 0
         for i in test:
             (com, value) = comments[i]
-            if value != 3:
+            if value != self.Exc:
                 it = it + 1
                 splitted = tokenizedComm[i]
                 evaluate = self.feature(N, com, splitted, posWords, negWords,
