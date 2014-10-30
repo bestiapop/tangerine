@@ -12,14 +12,16 @@ from nltk.metrics import ConfusionMatrix
 
 class Clasificator:
 
-    def __init__(self, Exc=3):
+    def __init__(self, Ver=2):
         self.__xls_range = 'G3:H875'
         self.__resources = './resources/'
         self.__comment_file = self.__resources + 'Comentarios_Peliculas.xlsx'
         self.__train_file = './resources/train.txt'
         self.__test_file = './resources/test.txt'
         self. __res = 'res/'
-        self.Exc = Exc
+        self.Exc = 0
+        if Ver == 2:
+            self.Exc = 3
         pass
 
     def loadComments(self):
@@ -80,12 +82,6 @@ class Clasificator:
         #custom features
         if self.generateHeuristic(pcomment):
             features["no_gusto"] = True
-        #features["custom_pos"] = cant_pos
-        #features["custom_neg"] = cant_neg
-        #if cant_pos > 2:
-        #    features["custom_pos"] = 2
-        #if cant_neg > 2:
-        #    features["custom_neg"] = 2
 
         return features
 

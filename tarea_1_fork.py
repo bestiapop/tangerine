@@ -35,14 +35,26 @@ class Utils:
     __listaElem_file = __resources + 'listasElementosSubjetivos.pl'
 
     # socket
-    def __init__(self, Display=False, WS=False, Exc=3):
+    def __init__(self, Display=False, WS=False, Ver=2):
         self.Display = Display
         self.ws = WS
-        self.Exc = Exc
+        self.Exc = 0
+        self.Ver = Ver
         if not os.path.exists(self.__dir_images):
             os.makedirs(self.__dir_images)
         if not os.path.exists(self.__res):
             os.makedirs(self.__res)
+        # load utils
+        self.cell_range = self.loadXLSFile()
+        self.stopwords = self.loadStopwords(Ver)
+        (self.positiveWords, self.negativeWords) = self.loadSubjetiveElems()
+        self.domain = None
+        # if version 2 then exclude commets with value=3, and filter words
+        if self.Ver == 2:
+            print "domain 2"
+            self.Exc = 3
+            self.domain = self.loadDomain()
+
         #socket
         self.encoding = 'UTF-8'
         self.BUFSIZE = 1000240
@@ -78,13 +90,7 @@ class Utils:
         word = re.sub("Ñ", u"Ñ", word)
         return word
 
-    def tmpFile(self, comment):
-        temp = open(self.__infile, "w")
-        temp.write(comment.encode('utf-8', 'replace'))
-        temp.flush
-        temp.close
-
-    def lematization_freeling_client(self, comment, stopwords, domain):
+    def lematization_freeling_client(self, comment):
         send = comment + '\n\0'
         self.socket.sendall(send.encode("UTF-8", 'strict'))
 
@@ -116,10 +122,13 @@ class Utils:
                     tag = args[2]
                     if not re.match(r"^F.*", tag) and \
                     not re.match(r"^Z.*", tag) and \
-                    not lema in stopwords and \
-                    not lema in domain:
+                    not lema in self.stopwords:
                         lema = unicode(lema, "UTF-8")
-                        lista.append(lema)
+                        if self.domain:
+                            if not lema in self.domain:
+                                lista.append(lema)
+                        else:
+                            lista.append(lema)
         return lista
 
     def u(self, s, encoding='utf-8', errors='strict'):
@@ -179,10 +188,13 @@ class Utils:
         cell_range = sheet.range(self.__xls_range)
         return cell_range
 
-    def loadStopwords(self):
+    def loadStopwords(self, Ver):
         stopwords = {}
+        swFiles = ['sw0.txt', 'sw1.txt', 'sw2.txt']
+        if Ver == 1:
+            swFiles = ['sw0.txt']
         try:
-            for files in ['sw0.txt', 'sw1.txt', 'sw2.txt']:
+            for files in swFiles:
                 with open('./resources/' + files) as list1:
                     for word in list1:
                         if not word in stopwords.keys() and word.rstrip():
@@ -263,16 +275,11 @@ class Utils:
         mydicpos = {}
         allWords = {}
 
-        cell_range = self.loadXLSFile()
-        stopwords = self.loadStopwords()
-        (positiveWords, negativeWords) = self.loadSubjetiveElems()
-        domain = self.loadDomain()
-
         tokenizedComm = {}
         negComm = 0
-        numComm = len(cell_range)
+        numComm = len(self.cell_range)
         it = 0
-        for rows in cell_range:
+        for rows in self.cell_range:
             it = it + 1
             (valor, key) = rows
             if key.value != self.Exc:
@@ -284,10 +291,9 @@ class Utils:
                 #lematize and filter F words
                 if ws:
                     lista = webService.lematization_freeling_ws(valor.value,
-                        stopwords)
+                        self.stopwords)
                 else:
-                    lista = self.lematization_freeling_client(valor.value,
-                        stopwords, domain)
+                    lista = self.lematization_freeling_client(valor.value)
 
                 tokenizedComm[it - 1] = lista
                 list_aux = []
@@ -313,8 +319,8 @@ class Utils:
         mydicposList = [seq[0] for seq in mydicposSorted][:100]
 
         # intersection
-        negativeI = set(mydicnegList).intersection(negativeWords.keys())
-        positiveI = set(mydicposList).intersection(positiveWords.keys())
+        negativeI = set(mydicnegList).intersection(self.negativeWords.keys())
+        positiveI = set(mydicposList).intersection(self.positiveWords.keys())
 
         #for graph c
         dicPosC = {}
@@ -333,11 +339,14 @@ class Utils:
             reverse=True)
 
         # Print top 100 positive and negative Words
-        print '\033[1m\033[31m' + 'Negative Words' + '\033[0m'
+        greenFont = '\033[1m\033[31m'
+        redFont = '\033[1m\033[32m'
+        endFont = '\033[0m'
+        print greenFont + 'Negative Words' + endFont
         for negative in negativeI:
             print '\t' + negative
 
-        print '\n' + '\033[1m\033[32m' + 'Positive Words' + '\033[0m'
+        print '\n' + redFont + 'Positive Words' + endFont
         for positive in positiveI:
             print '\t' + positive
 
@@ -363,7 +372,7 @@ class Utils:
         self.generateStatisticData(allWordsSorted, mydicposSorted,
             mydicnegSorted, numComm, negComm)
 
-        print '\033[1m\033[31m' + 'Words All' + '\033[0m'
+        print redFont + 'Words All' + endFont
         for w in allWordsSorted[:100]:
             print w
 
@@ -378,10 +387,9 @@ class Utils:
 if __name__ == "__main__":
     display = False
     ws = False
-    # to exclude comments with value=3 =>exc=3, else exc=0
-    exc = 3
+    ver = 2
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "wd", [])
+        opts, args = getopt.getopt(sys.argv[1:], "wdv", [])
     except getopt.GetoptError:
         print 'Invalid arguments'
         sys.exit(2)
@@ -391,8 +399,10 @@ if __name__ == "__main__":
             ws = True
         elif opt == "-d":
             display = True
+        elif opt == "-v":
+            ver = 1
 
-    utils = Utils(Display=display, WS=ws, Exc=exc)
-    classify = Clasificator(Exc=exc)
+    utils = Utils(Display=display, WS=ws, Ver=ver)
+    classify = Clasificator(Ver=ver)
     (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
     classify.process(posWords, negWords, posI, negI, tokenizedComm)

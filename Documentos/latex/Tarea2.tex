@@ -1,0 +1,368 @@
+\documentclass[12pt]{article}
+
+%Import packages
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage[utf8]{inputenc}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage[]{hyperref}
+\usepackage{url}
+\usepackage{pgfgantt}
+\usepackage{comment}
+\usepackage{array}
+\usepackage[section]{placeins}
+\usepackage{array,xstring}
+\usepackage{numprint} 
+\usepackage{pdflscape} %%landscape
+\usepackage{rotating}
+\usepackage{graphicx}
+
+%%config indice, referencias, metadata.
+\hypersetup{
+    pdftitle={Tarea 2 PLN},
+    bookmarksnumbered=true,     
+    bookmarksopen=true,         
+    bookmarksopenlevel=1,       
+    colorlinks=true,            
+    pdfstartview=Fit,           
+    pdfpagemode=UseOutlines,
+    pdfpagelayout=TwoPageRight,
+    urlcolor=blue,
+    linkcolor=blue,
+    citecolor=red
+}
+
+% titulo
+\title{Tarea 2 \\ IPLN \\ Grupo 9} 
+
+% autores
+\author{
+  Valentina Da Silva 5.113.011-5\\
+  Victor Díaz 4.295.936-0\\
+  Leonardo Clavijo 5.054.830-5
+}
+
+\date{\today}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+En este presente documento se procede a la explicación, tanto de la implementación de la aplicación, así como los parámetros de configuración necesarios para la ejecución de la misma.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Introduction}
+En la presente aplicación se trabajó en base a dos metodologías de procesamiento de datos, mediante el uso de WebServices y una aplicación local(LAN) del servico Freeling.
+Por lo tanto en la implementación contamos con dos modos de ejecución, esto puede ser útil para el caso de los usuarios que no cuenta con un servidor Freeling local, pero sí mediante una arquitectura orientada a servicios.
+Al pensar en ambos casos, tenemos la ventaja de que si no contamos con alguno de ellos, podemos utilizar el otro método.
+
+\section{Requerimientos}
+
+\subsection{Librerías}\label{lib}
+Para la correcta ejecución de la aplicación es necesario contar con el siguiente conjunto de librerías:
+\begin{itemize}
+  \item suds :  Para utilizar la aplicación mediante Webservices, se trata de una librería que permite la creación de estructuras orientadas a webservices, utilizando el protocolo SOAP.
+  \item mathplotlib: Se utiliza para realizar las gráficas pertientes al requerimiento 4.b del laboratorio.
+  \item openpyxl : Librería utilizada para la lectura de archivos xls, para el caso en particular el archivo que contiene los comentarios a ser procesados.
+\end{itemize}
+
+Los mismas pueden ser agregadas fácilmente utilizando pip o easy-install.
+\begin{itemize}
+  \item suds : pip install suds-jurko | easy\_install suds-jurko.
+  \item mathplotlib : pip install matplotlib | easy\_install -m matplotlib.
+  \item openpyxl : pip install openpyxl | easy\_install openpyxl.
+\end{itemize}
+
+
+\subsection{Freeling}\label{free}
+Para ejecutar la aplicación utilizando un servidor local, es necesario contar con la aplicación Freeling y ejecutarla en modo servidor, para ello se recurre a la siguiente orden vía línea de comandos:
+$analyze$ $-f$ $./config/es.cfg$ $--server$ $--port$ $50005$ $\&$
+Donde es.cfg es la configuración general de Freeling para lograr el correcto procesamiento del léxico en cuestión, de esto se tratará en la sección 'Configuraciones Freeling'\ref{configFree}; 50005 es el puerto en el que el servidor escucha los pedidos.
+Una vez que se realizó este paso correctamente, podemos ejecutar nuestra aplicación Python. 
+
+\subsubsection{Configuración}\label{configFree}
+Los parámetros que se utilizaron para configurar Freeling en modo servidor fueron los siguientes(./config/es.cfg):
+\begin{itemize}
+\item AffixAnalysis=no : No es necesario en este caso.
+\item MultiwordsDetection=yes : Se utiliza para detectar palabras múltiples en una 'string' ya que es habitual errores de tipeo como la falta de espacios o la introducción del caracter $.$ como separador.
+\item NumbersDetection=yes : Opcional, se optó por introducirlo aunque aporte en menor proporción.
+\item PunctuationDetection=yes : Detecta la puntuación que posteriormente se excluye de las palabras finales.
+\item DatesDetection=no : No es necesario en este contexto, puesto que en esta categoría de comentarios no requiere tal precisión para procesar.
+\item QuantitiesDetection=no : No es necesario procesar este tipo de magnitudes, se toma como una palabra cualquiera. 
+\item DictionarySearch=yes : Para definir el lema, es útil que se encuentre en el diccionario para generar un tag correcto.
+\item ProbabilityAssignment=yes : En algún caso podría ser necesario.
+\item OrthographicCorrection=no : No sería una idea negativa utilizarlo, aunque para el caso no es una prioridad a tener en cuenta.
+\item NERecognition=no : Identificar nombres por ejemplo no aporta calidad a la solución, además se observa comentarios como "Genial, Me Ha Atrapado la película", en realidad genera problemas cuando estamos agrupando las palabras positivas y negativas ya que con esta opción agruparía en un conjunto "Me Ha Atrapado" y se pedería lemas que aportan datos a la solución.
+\end{itemize}
+Estos fueron las configuraciones más importantes a tener en cuenta en el análisis morfológico, se deja a consideración el archivo ubicado en $./config/es.cfg$ para más detalles, además el mismo debe procesarse cuando se inicia el servicio de Freeling.
+
+
+\section{Ejecución}
+Para ejecutar la aplicación, únicamente se le debe brindar permisos de ejecución al archivo $tarea_1.py$, y mediante línea de comandos la siguiente orden:
+$./tarea_1.py$
+o $./tarea_1.py -w$ para ejecutarlo utilizando webservices anteriormente descripto.
+Como parámetro adicional se brinda la opción $-d$ la cual muestra las gráficas en tiempo de ejecución. Para proceder a ello se puede ejecutar el programa de la forma $./tarea_1.py -d$.
+
+Una aclaración importante, la aplicación se ha probado exclusivamente en ambiente UNIX, desde la instalación de Freeling hasta las librerías de Python, ante funcionamientos anómalos en plataformas Windows, se sugiere que el programa sea ejecutado en UNIX.
+Caso contrario de no disponer un entorno, igualmente puede ejecutarse el programa utilizando Webservices. Aunque el funcionamiento no es óptimo los resultados son semejantes.
+
+\section{Visualización}
+Se muestra la interacción del sistema, según el modo de ejecución.
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/arq.png}
+  \caption{Interacción}
+  \label{fig:arq}
+\end{figure} 
+
+
+\section{Implementación} \label{impl}
+Se procede a la descripción de la implementación del programa. Para ello se utilizaron dos clases básicas para las configuraciones:
+\begin{enumerate}
+   \item Utils : que se encuentra en el mismo archivo a ejecutar $tarea_1.py$, la misma se encarga de realizar operaciones de lectura y escritura en los archivos, así como el porcesamiento de los datos utilizando Freeling.
+   \item WebService : la misma se encuentra en el archivo webservices.py, se utiliza para cargar las especificaciones del servicio web en cuestión, además de brindar la implementación de solicitud y procesamiento de del léxico. Básicamente devuelve una lista con todas las palabras con su respectivo tag, lema y probabilidad.
+ \end{enumerate} 
+
+A continuación se describe las funciones definidas en el archivo $tarea_1.py$, específicamente de la clase útils.
+
+
+\subsection{loadXLSFile} \label{xlslib}
+Encabezado: $def$ $loadXLSFile(self)$
+Cuando se instancia la clase $Utils$, en sus atributos privados se encuentran ciertos parámetros que definen las condiciones a tener en cuenta para la lectura del archivo $.xlsx$, en particular el nombre del mismo $\_\_comment\_file$ y el rango de las celdas que deben ser procesadas($\_\_xls\_range$), básicamente utiliza la librería descrita en la sección anterior librería \ref{lib}, y devuelve como resultado el rango de celdas especificado por el parámetro en cuestión, el cual será iterado en la función main.
+
+
+\subsection{loadStopwords}\label{func:loadSW}
+Firma: $def$ $loadStopwords(self, Ver=2)$
+En este caso se carga en un diccionario las palabras vacías que se suministran en el archivo $stopwords.txt$, se devuelve un diccionario para el rápido procesamiento posterior llevado a cabo. El parámetro $Ver$ con el valor en dos implica que se carga la lista de stopwords mejorada según el obligatorio 2, en caso contrario se procede a la carga con la lista brindada en la entrega anterior.
+
+
+\subsection{loadSubjetiveElems}
+Firma: $def$ $loadSubjetiveElems(self)$
+Esta función carga el léxico proporcionado en el archivo $listaElementosSubjetivos.pl$, devolviendo un diccionario como estructura para su posterior procesamiento.
+
+\subsection{loadDomain}\label{func:loadDomain}
+Firma: $def$ $loadDomain(self)$
+Básicamente abre el archivo $resources/dominio.txt$, y carga en un diccionario las palabras consideradas dentro del dominio del cine. En caso de que el archivo no se encuentre en el directorio especificado, se procede a lanzar una excepción correspondiente a dicho error.
+
+\subsection{lematization\_freeling\_client}
+Firma: $def$ $lematization\_freeling\_client(self, comment)$.
+Argumentos:
+\begin{itemize}
+  \item $comment$ : Comentario particular a ser procesado.
+\end{itemize}
+Su funcionalidad principal es tomar un comentario específico mediante una string, preprocesado anteriormente; se emplea sockets para la comunicación con el servidor Freeling, a diferencia de la primera entrega que utilizaba únicamente el servidor Freeling local y el uso de archivos auxiliares para procesar los pedidos. La ventaja de la utilización de sockets es que se puede ejecutar en ambientes remotos, desacomplando totalmente la aplicación del servidor. Básicamente devuelve una lista con lemas que cumplen ciertos criterios, como ser:
+\begin{itemize}
+  \item No se encuentra en la lista de palabras vacías.
+  \item No se encuentra en la lista del dominio del problema.
+\end{itemize}
+
+
+\subsection{plot} \label{func:plot}
+Firma: $def$ $plot(self, listaPlot, n\_groups, filename, totalwords)$ \\
+Argumentos:
+\begin{itemize}
+  \item listaPlot : Contiene una lista ordenada con la siguiente tupla de datos $(Palabra, Comentarios)$, donde $Palabra$ es el lema a graficar, y $Comentario$ es la cantidad de veces comentarios en la que $Palabra$ está presente. Notar que se contabiliza únicamente una vez la palabra por comentario, para evitar casos extremos que degraden el comportamiento del programa en cuestión, ej. Comentario = "Hola, hola, hola, ...", si se evalúa globalmente, puede perjudicar el estudio en cuestión.
+  \item n\_groups : Cantidad de palabras que serán procesadas en la salida gráfica.
+  \item filename : Nombre del archivo de salida del procesamiento gráfico, la imagen será guardada en el directorio $figures$ localizado en la ruta donde se procesa la aplicación.
+  \item totalwords : cantidad de lemas a ser procesados.
+\end{itemize}
+
+Su funcionalidad lo describe el nombre de la función, retorna una salida gráfica mediante archivos $.png$ con los resultados obtenidos.
+En la implementación en cuestión se invoca cinco veces la presente función, generando los archivos a continuación:
+\begin{itemize}
+  \item AllWords.png : Se encuentran las $n\_groups$ palabras ordenadas de forma decreciente, en este caso no se distingue entre palabras positivas y negativas, básicamente es un conteo global de todas las palabras procesadas.
+  \item NegativeSubjetive.png : En este caso se suministra el top $n\_groups$ palabras presentes en comentarios con un a puntuación 1 o 2 intersección palabras negativas suministradas en el archivo $listaElementosSubjetivos.pl$.
+  \item PositiveSubjetive : Análogo al caso anterior pero aplicado a palabras positivas.
+  \item NegativeWords.png : Ilustra las palabras presentes en los comentarios con evaluación negativa(1 y 2).
+  \item PositiveWords.png : Análogo caso anterior pero teniendo en cuenta palabras con evaluación positiva.
+\end{itemize}
+
+
+\subsection{process}
+Este bloque se encarga de tomar las funciones anteriormente mencionadas y procesar el algoritmo de forma adecuada.
+Se presenta a continuación un pseudo-código de la implementación.
+
+\begin{algorithmic}
+  \State $xls \gets cargar\_comentarios()$
+  \State $stopwords \gets cargar\_palabras\_vacias$
+  \State $subjetivas \gets cargar\_palabras\_subjetivas$
+  \State $domain \gets cargar\_dominio$
+  
+  \For{$comentario$ in $xls$}
+    \State {$lista \gets lematizar(comentario)$}
+     \For{$palabra$ in $lista$}
+       \State {$(pos, neg) \gets agregarDiccionario()$}      
+     \EndFor
+  \EndFor
+  
+  \State $imagenes \gets graficarResultados(pos, neg)$
+\end{algorithmic}
+Las primeras cuatro líneas se compactan en la función de instanciación del objeto Utils, cargando entonces las palabras vacías, el dominio del problema, la lista de palabras subjetivas y los comentarios.
+La simplicidad que brinda Python para el procesamiento de datos, básicamente resume el pseudocódigo en la implementación en sí misma, salvo detalles menores que requieren un procesamiento refinado.
+
+
+\subsection{Eficiencia}
+La complejidad del un programa se reduce a las estructuras utilizadas, la correcta utilización de las mismas implica un impacto directo sobre la eficiencia del programa. Para ello se utilizaron diccionarios para almacenar las palabras contenidas en los comentarios, de esta forma poder acceder en orden 1. La búsqueda se reduce a investigar si la llave(key) de indexado se encuentra presente en el diccionario. Por lo contrario, utilizando listas, la performance al procesar una lista mayor de comentarios tiene un impacto negativo en tiempos de ejecución.
+Se recomienda fuertemente utilizar el modo de ejecución con servidor local con Freeling, de esta forma se reducen costos de tráfico de red y posibles "errores de ejecución" ajenas al programa diseñado.
+La simplicidad de utilizar expresiones regulares para realizar reemplazos y búsquedas impacta positivamente en el desempeño del programa, es por ello que se utilizaron las mismas para sintetizar la lista de elementos subjetivos. Además agrega elegancia a la solución.
+La captura de excepciones permite brindarle al usuario un detalle sobre los requerimientos que debe satisfacer para ejecutar correctamente el programa, para ello se implementó un manejo de las mismas en los casos de lectura y escritura de archivos así como también en el caso del WebService, que en ocasiones adversas no responde de forma adecuada.
+
+
+\section{Análisis}
+En las secciones anteriores se ha detallado aspectos de inicialización del ambiente para ejecutar la aplicación, así como las configuraciones pertinentes de Freeling, detalles sobre la implementación y algunas consideraciones sobre eficiencia. En este apartado se analizarán los resultados obtenidos luego de la ejecución del programa. Para ello en las siguientes subsecciones se detallarán los puntos requeridos en la letra del laboratorio.
+
+
+\subsection{Información CORPUS}
+Para esta consigna se utilizó la librería $openpyxl$ ya citada en la sección Librerías [\ref{lib}]. Básicamente se utilizó la función $loadXLSFile$ descrita en la sección Implementación [\ref{xlslib}], particularmente no se realizó un mapeo a memoria de los comentarios y sus respectivos puntajes, debido a que almacenar los mismos en estructuras internas como ser listas o diccionarios implica contar con memoria extra para ejecutar la aplicación. En lugar de ello se recorre el archivo .xls brindado, haciendo lecturas del archivo en sí mismo, y no realizando el almacenamiento para su posterior lectura. Por lo tanto la información no se extrae completamente, pero sí parcialmente, con el fin de mejorar el rendimiento tanto en consumo de memoria como en la velocidad de ejecución del programa.
+La lectura se realiza por medio de la función $loadXLSFile$ y posteriormente se recorre en la función $main$, 'lematizando' y realizando un análisis morfosintáctico, pero ello hace parte de la siguiente subsección.
+
+
+\subsection{Procesamiento Información} \label{proc}
+Como se mencionó anteriormente, las tareas de extracción de la información del CORPUS y el procesamiento de la información mediante Freeling se realizaron en paralelo con la finalidad de optimizar recursos y potenciar la eficiencia del programa. Para este punto se puede utilizar procesamiento mediante WebServices o un servidor Freeling local(recomendado), las configuraciones del servidor local se encuentran detalladas exhaustivamente en el archivo $es.cfg$ que se encuentra en el directorio $/config$. Los detalles particulares sobre la configuración de Freeling ya fueron mencionados[\ref{configFree}].
+En la función $main$ se utiliza la función $lematizacion\_freeling\_client$ para procesar el comentario perteneciente al CORPUS, la cual tiene como retorno una lista de las palabras únicamente con el lema, puesto que el tag se utiliza para filtrar algunos elementos que no serán necesarios para el post procesamiento, en este caso se filtraron los siguientes tags:
+\begin{itemize}
+  \item $F$ : Denotan signos de puntuación, los cuales no consideraremos en nuestro análisis posterior.
+  \item $Z$ : Los determinantes numerales tampoco son considerados en el análisis. 
+\end{itemize}
+Una vez que se cuenta con la lista de lemas de las palabras de un comentario, se almacenan en un diccionario usando como llave dicho lema, y como valor un dato del tipo Integer, con la finalidad de contabilizar la cantidad de veces que ocurre dicho lema en todos los comentarios a estudiar. Dicho conteo se realiza una vez por comentario, no la cantidad de ocurrencias global, con el fin de evitar comentarios con repetición de palabras que puedan interferir en el análisis de la muestra.
+Se agregan los lemas en tres diccionarios, uno contiene todos los lemas procesados hasta el momento, y realiza el conteo global de todos los lemas independientemente del puntaje de un comentario. El segundo diccionario contiene únicamente los lemas que ocurren en comentarios evaluados con notas 1 y 2, mientras que el tercer diccionario almacena los lemas que ocurren en comentarios cuyo puntaje es 3,4 o 5. 
+
+
+\subsection{Incorporar Recursos}
+Este punto se realiza ejecutando las funciones descritas en la sección implementación[\ref{impl}], ellas son $loadSubjetiveElems$, la cual se encarga de incorporar el léxico suministrado en el archivo $listasElementosSubjetivos.pl$ y la función $loadStopwords$ que incorpora el archivo $stopwords.txt$ que contiene una lista con las palabras vacías, a modo de poder filtrar una cantidad mayor de palabras.
+Ambos archivos se encuentran en el directorio $/resources$ junto con el .xls a procesar.
+Las funciones retornan un diccionario con las palabras que se encuentran en los respectivos archivos, en el caso de los elementos subjetivos retorna dos diccionarios, uno con las palabras positivas y el otro las negativas, a modo de trabajar posteriormente con conjuntos y realizar las intersecciones pertinentes.
+
+Se consideró oportuno mantener la información del obligatorio anterior, como son las secciones anteriores, ya que la tarea es incremental.
+
+\subsection{Parte 1 :}
+Para este requerimiento fue sencillo mejorar la lista de palabras vacías(stopwords), básicamente se generalizó la función \ref{func:loadSW} agregando un parámetro que indique si se debe cargar una lista en particular o la intersección de varias listas encontradas en la web.
+En cuanto al requerimiento del dominio del problema, se generó una lista que se encuentra en un archivo llamado $dominio.txt$, ubicado en el directorio $/resources$. Para cargar esta lista de palabras, nuevamente se utilizó un diccionario para mejorar el proceso de búsqueda. Para más referencias observar la descripción de la función \ref{func:loadDomain}.
+En el requerimiento que considera los comentarios positivos únicamente con la puntuación 4 y 5, se agregó el parámetro $Ver$, si el mismo posee el valor $2$, se excluyen los comentarios con puntuaciones 3, caso contrario se mantiene como en el obligatorio 1. Este argumento se agrega al instanciar la clase $Utils$, y depende del pasaje de parámetros cuando se ejecuta el programa, en caso de existir la opción $-v$, se considera la versión de la tarea 1, y por tanto los comentarios positivos contienen los valores 3,4 y 5. También vale la pena destacar que la presencia de este parámetro también condiciona los filtros sobre los lemas, utilizando listas de stopwords mejorada, así como el dominio del problema.
+
+\subsection{Parte 2 :} \label{sub:part2}
+Los atributos seleccionados fueron los siguientes:
+\begin{itemize}
+  \item $positive(string)$: Donde $string$ pertenece a los $N$ primeros lemas de la lista cuyos comentarios tuvieron una mención positiva, indicando si el lema está está presente o no en dicho comentario. Para ello se utiliza un atributo binario(True, False).
+  \item $negative(string)$: Análogo al anterior, aplicado a los $N$ elementos de la lista con lemas donde los comentarios fueron evaluados con puntuación negativa.
+  \item $subjetive\_pos(lema)$ : $lema$ pertenece a la lista de elementos subjetivos brindada, si en el comentario dicho lema pertenece, entonces se agrega el atributo mencionado.
+  \item $subjetive\_neg(lema)$ : Análogo al anterior aplicado a la lista de elementos subjetivos negativos.
+  \item $no\_gusto$ : Una heurística detectada es que en una gran proporción de comentarios negativos a procesar, poseen términos afectivos positivos, como ser 'gustó', sin embargo están contenidos en un contexto semejante a 'no me gustó' o semejante. Para ello se procedió a evaluar 2 palabras anteriores a los términos afectivos positivos, y en caso de encontrarse con una negación, se agrega el atributo mencionado. Nuevamente un atributo binario, demostrando la presencia o no de dicha heurística en el comentario.
+\end{itemize}
+Los atributos se analizaron con una selección aleatoria de comentarios, con la proporción requerida por la letra del obligatorio. Se realizaron distintas pruebas con conjuntos distintos y se realizó un análisis estadístico de los datos, principalmente si el comportamiento del conjunto es normal, para ello se utilizaron test de normalidad de DAgostino y ejecutaron sobre 30 conjuntos distintos, ya que con dicho valor agrega un significado estadístico relevante. Si bien la letra del problema no requiere este procedimiento, se consideró oportuno observar si el conjunto seleccionado tiene impacto positivo o negativo en el momento de evaluar la calidad del clasificador. Para eso consideraremos la desviación estándar en los datos, así como la media de los valores $precision$ y $recall$, así como también $accuracy$. En el caso que los conjuntos seleccionados de forma aleatoria se comportan siguiendo una distribución normal, podemos establecer una cota en los atributos de calidad a evaluar, de esta forma también podemos asegurar que en promedio la calidad del clasificador es semejante cualquiera sea el conjunto de datos tomado como referencia, con un márgen de error acotado.
+Además para evaluar la calidad de las soluciones no es suficiente tratar con un conjunto particular, puede ocurrir que al seleccionar un conjunto cualquiera, con la solución propuesta los atributos de calidad sean óptimos, pero no para un caso global. Entonces evaluar la solución sobre una cantidad significativa de conjuntos si brinda datos significativos sobre el comportamiento del clasificador de forma global y no particular.
+\subsection{Parte 3 :}
+Para esta sección utilizamos el coonjunto de libreríás $nltk$ para generar un clasificador. Para ello se creó una clase llamada $classification.py$ que cuenta con las funciones mencionadas en el apartado de la arquitectura del sistema. Básicamente las funciones principales a tratar en esta clase son las siguientes:
+\begin{itemize}
+  \item $generate\_train\_set$
+  \item $feature$
+\end{itemize}
+La primera se utiliza para generar los conjuntos de entrenamiento y testing, utilizando una proporción $0.7$ para el primero.
+La segunda función agrega los atributos a los comentarios en cuestión, descriptos en la sección anterior[\ref{sub:part2}].
+Como se mencionó anteriormente se evaluó el comportamiento a partir de 30 conjuntos de entrenamientos distintos, tanto para los comentarios positivos con puntuación 3,4 y 5 así como los que excluyen el puntaje 3 del conjunto.
+Los resultados obtenidos en esta parte se presentan en la sección Estadístico[\ref{sub:estad}], con dichos valores se procederá a tomar conclusiones adecuadas a la calidad del clasificador generado, dependiendo también de qué se considera como comentario positivo.
+La generación del conjunto de entrenamiento se realizó de forma aleatoria, para evitar linealidad en la selección de los comentarios, influyendo de forma negativa en el momento de evaluar la calidad del clasificador. Para ello se toma la cantidad de comentarios en el Corpus y se toma aleatoriamente $0.7$ de los mismos, los restantes formarán parte del conjunto de testing. Cabe mencionar que por facilidad en la ejecución del programa, se guarda en un archivo $test.txt$ y $train.txt$ los números relativos a los comentarios seleccionados.
+\subsection{Estadístico} \label{sub:estad}
+
+\subsection{Resultados}
+Finalmente contamos con los resultados requeridos, ya sea ejecutando la aplicación que brinda una ventana con los gráficos o las imágenes guardadas en el directorio figures una vez terminada la ejecución.
+Primeramente analizaremos los resultados globales, para ello observamos gráfica de la figura [\ref{fig:todas}], en la cual las palabras más utilizadas son 'bueno', 'película', 'ver', 'haber', 'historia'. Posteriormente analizaremos a qué conjunto pertenecen dichas palabras, es decir, si se tratan de palabras positivas o negativas y si se incluyen en el léxico suministrado $listasElementosSubjetivos.pl$. Los primeros cuatro elementos suman aproximadamente un $30 \%$ de las palabras sintetizadas, puede interpretarse como un resultado específico del contexto, al tratarse de comentarios sobre películas el uso de las mismas es excesivo, ya sea por la calidad al escribir los comentarios por parte de los usuarios o porque el contexto en sí mismo amerita este tipo de palabras. Quiere decir estadísticamente que un tercio de las palabras encontradas en comentarios sobre películas se resume a las primeras cuatro.
+Para el siguiente caso se analiza las palabras presentes con mayor frecuencia en los comentarios evaluados con puntaje negativo, ellas son 'ver', 'película', 'haber', 'bueno', 'malo', paradójicamente el lema bueno es superior al lema malo, por lo que puede interpretarse que los usuarios comentan utilizando la negación, como ser un ejemplo "no es buena la película", en este caso involucra un comentario negativo pero utilizando un lema valorado positivo. Para más detalles en el momento de realizar el análisis se obtuvo una salida extra para procesar datos con mayor precisión e incluir en el presente informe un análisis con 'peso' estadístico. El mismo se puede encontrar en el directorio $res/$.
+
+\subsubsection{Lemas}
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/Lemas.png}
+  \caption{Cantidad de lemas}
+  \label{fig:lemas}
+\end{figure} 
+Se grafica la cantidad de lemas obtenidos luego del procesamiento de datos[\ref{fig:lemas}].
+
+\subsubsection{Comentarios}
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/Comentarios.png}
+  \caption{Cantidad de comentarios}
+  \label{fig:com}
+\end{figure} 
+En este caso, se contabilizan la cantidad de comentarios positivos y negativos[\ref{fig:com}].
+
+\subsubsection{Gráficas}
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/AllWords.png}
+  \caption{Todas las palabras}
+  \label{fig:todas}
+\end{figure} 
+La gráfica[\ref{fig:todas}] muestra las palabras más encontradas en los comentarios punteados de manera positiva como negativa. Se aprecia en la misma una mayor cantidad de palabras de semántica positiva con respecto a las de semántica negativa.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/NegativeWords.png}
+  \caption{Todas las palabras negativas}
+  \label{fig:allneg}
+\end{figure} 
+La gráfica[\ref{fig:allneg}] muestra las palabras más encontradas en los comentarios de puntuación negativa. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtengan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/NegativeSubjetive.png}
+  \caption{Intersección palabras negativas}
+  \label{fig:negsub}
+\end{figure} 
+
+La gráfica[\ref{fig:negsub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico en la gráfica anterior. En la gráfica se observa una diferencia notoria del termino “malo” con respecto a los otros términos en su frecuencia.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/PositiveWords.png}
+  \caption{Todas las palabras positivas}
+  \label{fig:pos}
+\end{figure} 
+
+La gráfica[\ref{fig:pos}] muestra las palabras más encontradas en los comentarios de puntuación positiva. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtenegan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras y la gráfica correspondiente al Top de las palabras negativas. Se observa una mayor frecuencia de los términos “bueno” y “película” con respecto a los otros.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/PositiveSubjetiveWords.png}
+  \caption{Intersección palabras positivas}
+  \label{fig:possub}
+\end{figure} 
+
+
+La gráfica[\ref{fig:possub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico anteriormente. En la gráfica se observa una diferencia notoria de los terminos “bueno” y “película” con respecto a los otros terminos en su frecuencia. Estos terminos también son los términos de mayor frecuencia en la gráfica Top palabras positivas.
+
+\section{Conclusiones}\label{conclusions}
+Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación.
+
+\subsection{Implementación}
+Lenguaje de programación alto nivel, presenta gran diversidad de librerías internas como externas que facilitan la tarea en gran parte. Su alto nivel permite no definir tipos específicos y de esta forma se trabaja de manera más fluida, aunque esto pueda llegar a confusiones si no se declaran correctamente las variables con un nombre adecuado.
+Escaso tiempo de implementación, dada la versatilidad, el tiempo de implementación se reduce considerablemente considerando con otros lenguajes de programación.
+Al ser lenguaje interpretado, es sencillo de utilizarlo para realizar tareas de menor porte que requieran una cantidad de datos moderado. Se desconoce funcionamiento con gran cantidad de comentarios(potencialmente superior a el caso propuesto).
+Codificación legible, si se utilizan estándares como el propuesto en la implementación(PEP8), brinda a terceros la posibilidad de tener un código legible y simple a la lectura.
+Portabilidad con sistemas operativos no es 100\% satisfactorio, para desarrollar existieron problemas específicamente de codificación de las palabras, en entornos UNIX no existe dicho problema, mientras que en sistemas Windows existieron los problemas mencionados, además de todo el proceso de instalación del lenguaje(tedioso en Windows) así como también las herramientas(Freeling).
+Salvo detalles menores es un lenguaje adecuado para utilizarlo para el procesamiento de datos a pequeña y mediana escala.
+Al brindar características de un paradigma funcional(map, zip, etc), brinda simplicidad y 'ahorro' en cantidad de líneas utilizadas en total.
+La unificación derivada de la programación lógica, combinada con paradigma funcional hace un lenguaje poderoso con lo que refiere manipulación de datos en general, una característica deseable también como  ser la posibilidad de generar APIs con swig y combinar la eficiencia de c++ en la ejecución de algoritmos que requieran uso excesivo del recurso CPU. 
+
+
+
+
+
+%\bibliographystyle{abbrv}
+%\bibliography{simple}
+
+\end{document}
