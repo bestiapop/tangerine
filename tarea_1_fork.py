@@ -123,11 +123,12 @@ class Utils:
                     if not re.match(r"^F.*", tag) and \
                     not re.match(r"^Z.*", tag) and \
                     not lema in self.stopwords:
-                        lema = unicode(lema, "UTF-8")
                         if self.domain:
                             if not lema in self.domain:
+                                lema = unicode(lema, "UTF-8")
                                 lista.append(lema)
                         else:
+                            lema = unicode(lema, "UTF-8")
                             lista.append(lema)
         return lista
 

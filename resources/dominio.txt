@@ -27,3 +27,5 @@ películas
 papel
 sala
 actuar
+verla
+uruguayo

@@ -189,11 +189,11 @@ class Clasificator:
                 if(message == "ERROR"):
                     errorComments.append((com, value))
 
-        classifier.show_most_informative_features(50)
+        classifier.show_most_informative_features(20)
 
         # confusion matrix
         cm = ConfusionMatrix(ref_list, test_list)
-        cm = '\n' + cm.pp(sort_by_count=True, show_percents=True, truncate=9)
+        cm = '\n' + cm.pp(sort_by_count=True, show_percents=False, truncate=9)
 
         # data metrics
         accuracy = nltk.classify.accuracy(classifier, dev_set)

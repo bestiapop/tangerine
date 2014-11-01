@@ -278,9 +278,10 @@ La generación del conjunto de entrenamiento se realizó de forma aleatoria, par
 \nprounddigits{3}
 
 \subsection{Estadístico} \label{sub:estad}
-Se obtuvieron los siguientes resultados[\ref{tabla:1}] generando 30 conjuntos aleatorios de entrenamiento y test, los resultados obtenidos implican que el $accuracy$ del clasificador es de aproximadamente 80\%, el mejor caso se obtuvo en el conjunto de número 15, donde el $accuracy$ se aproximó a un 84 \%. Este estudio demuestra en un caso global, ya que con una cantidad apreciable de conjuntos distintos podemos obtener significancia estadística en el momento de evaluar el clasificador en forma genérica.
-En la tabla \ref{tabla:2} tenemos los resultados incluyendo las puntuaciones 3 como comentarios positivos. Intuitivamente se podría decir que eliminando los comentarios con puntuación 3 tanto para entrenar el clasificador, como para evaluar los comentarios con ese puntaje, se obtendrían mejores resultados, pero en cambio las tablas demuestran lo contrario. Analizando la segunda tabla, podemos decir que los comentarios con puntuación 3 tiene un alto impacto cuando se clasifican los comentarios positivos, sin embargo en el momento de evaluar los negativos el desempeño es inferior al clasificador entrenado con un conjunto de comentarios excluyendo puntuaciones 3. Esto es un dato interesante para considerar, si tomamos el caso número $25$ tenemos un $accuracy$ de $84.7 \%$ apenas superior al de la primera tabla.
-Algunos detalles del estudio estadístico como ser la desviación estándar, y el test de normalidad de D Agostino se brindan en la tabla \ref{tabla:datos}. Para éste último como utilizamos un tamaño de muestra de 30 conjuntos, evaluaremos con un $\alpha = 0.05$ y a partir de esto tenemos las siguientes cotas  $[0.2662 0.2866]$, en el caso que el resultado del test de normalidad sea un valor que pertenece a dicho conjunto, la muestra es normal, por lo cual podemos utilizar como referencia para el planteo de conclusiones en cuanto a la calidad del clasificador se refiere.
+Para la obtención de los resultados, se implementó el módulo $Statistics.py$, el mismo utiliza los módulos $tarea_1.py$ y $classification.py$, toma los 30 conjuntos de entrenamiento anteriormente generados y clasifica los comentarios según los mismos. Además posee la funcionalidad de generar las tablas presentes en esta sección.
+Se obtuvieron los siguientes resultados[\ref{tabla:1}] generando 30 conjuntos aleatorios de entrenamiento y test, los resultados obtenidos implican que el $accuracy$ del clasificador es de aproximadamente 80\%, el mejor caso se obtuvo en el conjunto de número 25, donde el $accuracy$ se aproximó a un 84 \%. Este estudio demuestra en un caso global, ya que con una cantidad apreciable de conjuntos distintos podemos obtener significancia estadística en el momento de evaluar el clasificador en forma genérica.
+En la tabla \ref{tabla:2} tenemos los resultados incluyendo las puntuaciones 3 como comentarios positivos. Intuitivamente se podría decir que eliminando los comentarios con puntuación 3 tanto para entrenar el clasificador, como para evaluar los comentarios con ese puntaje, se obtendrían mejores resultados, pero en cambio las tablas demuestran esa hipótesis. Analizando la segunda tabla, podemos decir que los comentarios con puntuación 3 tiene un impacto impacto nulo cuando se clasifican los comentarios positivos, sin embargo en el momento de evaluar los negativos el desempeño es inferior al clasificador entrenado con un conjunto de comentarios excluyendo puntuaciones 3. Esto es un dato interesante para considerar, si tomamos el caso número $25$ tenemos un $accuracy$ de $84.7 \%$ apenas superior al de la primera tabla. Cuando contrastamos con las métricas $Recall$ y $Precision$ concluímos que para el caso 1, existe una leve mejora respecto al caso 2.
+Algunos detalles del estudio estadístico como ser la desviación estándar, y el test de normalidad de D Agostino se brindan en la tabla \ref{tabla:datos}. Para éste último como utilizamos un tamaño de muestra de 30 conjuntos, evaluaremos con un $\alpha = 0.02$ y a partir de esto tenemos las siguientes cotas  $[0.2622 , 0.2871]$, en el caso que el resultado del test de normalidad sea un valor que pertenece a dicho conjunto, la muestra es normal, por lo cual podemos utilizar como referencia para el planteo de conclusiones en cuanto a la calidad del clasificador se refiere.
 Los casos propuestos se resumen:
 \begin{itemize}
   \item Caso 1: Evaluación excluyendo comentarios con puntuación igual a 3.
@@ -297,7 +298,7 @@ Se tomó como referencia todos los atributos de calidad planteados, la nomenclat
 
 Las conclusiones que se pueden observar a partir de la tabla es que se puede tomar cualquier métrica como referencia, puesto que al realizar el test de normalidad efectivamente estamos comprobamos que para los datos, se comportan siguiendo una distribución normal.
 A partir de estos datos podemos comparar los dos casos propuestos de forma independiente según la métrica deseada, tomando la media como referencia y estableciendo qué atributo es mejor para los dos casos planteados.
-Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de los comentarios negativos, mientras que para el Caso 2 se clasifican los positivos con un mejor desempeño promedio. En lo que respecta a el $accuracy$ global, podemos decir que incluyendo en el dominio comentarios con valuación igual a 3 se obtienen mejores resultados.
+Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de los comentarios negativos, mientras que para los positivos en ambos casos las métricas son semejantes. Por tanto a nivel global con la métrica $accuracy$ el clasificador con distintos dominios de comentarios se comporta de forma similar, teniendo ventaja el primer clasificador excluyendo los comentarios con puntuaciones 3 de la clasificación positiva.
 \begin{table}
 \begin{center}
     \begin{tabular}{| c | c | c | c | c |}
@@ -311,11 +312,11 @@ Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de l
     \multicolumn{1}{|c}{$DA$}&
     \multicolumn{1}{|c}{$\sigma$}&
     \multicolumn{1}{|c|}{$DA$} \\ \hline
-    ACC & 0.025337 & 0.28570 & 0.016380 & 0.27771 \\ \hline
-    PP & 0.027625 & 0.28555 & 0.021212 & 0.27720 \\ \hline
-    RP & 0.025748 & 0.27779 & 0.017131 & 0.28631 \\ \hline
-    PN & 0.075062 & 0.27708 & 0.052173 & 0.27693 \\ \hline
-    RN & 0.072584 & 0.26872 & 0.054888 & 0.27498 \\ \hline
+    ACC & 0.026003 & 0.28689 & 0.016380 & 0.27771 \\ \hline
+    PP & 0.027385 & 0.28140 & 0.021212 & 0.27720 \\ \hline
+    RP & 0.024598 & 0.27735 & 0.017131 & 0.28631 \\ \hline
+    PN & 0.074322 & 0.27949 & 0.052173 & 0.27693 \\ \hline
+    RN & 0.065168 & 0.27797 & 0.054888 & 0.27498 \\ \hline
     \end{tabular}
 \end{center}
     \caption{Datos Estadísticos}
@@ -364,6 +365,104 @@ Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de l
 \label{tabla:2}
 \end{table}
 
+
+\subsection{Parte 4}
+Para esta subsección posteriormente a un análisis estadístico que involucra varios conjuntos de estudio, se selecciona un conjunto independiente a los del caso de prueba, si bien las métricas obtenidas están acotadas por lo cual se centrará particularmente en la generación de la matriz de confusión, así como las métricas $Precision$ y $Recall$.
+
+Se establece la separación de conjuntos en comentarios negativos y positivos, evaluado $Recall$ y $Precision$.
+\begin{itemize}
+  \item Accuracy: 0.8078
+  \item Precision Positive: 0.8474
+  \item Recall Positive: 0.8982
+  \item Precision Negative: 0.6730
+  \item Recall Negative: 0.5645
+\end{itemize}
+
+La matriz de confusión pertinente queda representada en la tabla \ref{tabla:matrix}, los valores en la diagonal indican los casos Verdadero-Positivo, mientras que cualquier otra celda que no corresponde a la diagonal indica que la clasificación del comentario es errónea. Como podemos observar, la correcta clasificación de los comentarios existe en mayor proporción cuando los comentarios poseen una valoración positiva. La proporción de comentarios negativos correctamente clasificados apenas supera el $50 \%$, lo cual implica que el rendimiento del clasificador es estrechamente superior en el momento de evaluar comentarios positivos.
+$Precision$ es una métrica que se evalúa según la siguiente ecuación:
+\begin{equation}
+  Precision = \frac{TP}{TP + FP}
+\end{equation}
+Entonces esta métrica nos reporta el porcentaje de acierto en la clasificación, observar que $Precision$ se maximiza cuando $FP=0$, es decir que no existen Falsos-Positivos es decir, el clasificador evaluó correctamente todos los comentarios.
+En cambio tenemos la ecuación de $Recall$:
+\begin{equation}
+  Recall = \frac{TP}{TP + FN}
+\end{equation} 
+Análogo al anterior pero define la métrica en proporción a los Falsos-Negativos obtenidos por el clasificador.
+Con los datos obtenidos, podemos decir que el clasificador no posee un comportamiento óptimo, si evaluamos el clasificador en un CORPUS distinto, pero aplicado al mismo dominio del cine donde predominen comentarios negativos, posiblemente el clasificador sea correctamente entrenado, mejorando los resultados en gran proporción.
+Vale la pena destacar que existe anomalía en ciertos comentarios, como no corresponder la puntuación con el cuerpo del comentario, un ejemplo claro es la contradicción de cierto usuario cuyo comentarios es "Muy bueno!", y el puntaje asignado corresponde a un 2. Estas anomalías no están al alcance del clasificador si no se tiene un dominio suficientemente extenso como para llegar a la conclusión que el lema "bueno", condiciona que el comentario sea negativo. En otras palabras, es más probable que dicho lema corresponda a un comentario cuya puntuación sea positiva. Sin embargo, existen comentarios de la forma "No me gusta", en los cuales si bien contiene un lema que pondera a comentarios positivos, aplicado al contexto con una negación implica lo contrario y por ende esos casos se consideraron como heurística factible para mejorar las mátricas del clasificador en el momento de evaluar el conjunto test.
+
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{|c|c|c|} 
+\cline{2-3}
+ \multicolumn{1}{l}{}&
+ \multicolumn{1}{|l}{POS}&
+ \multicolumn{1}{|l|}{NEG}
+\tabularnewline
+  \hline
+  POS & 150 & 17 \\ \hline
+  NEG & 27 & 35 \\ \hline
+\end{tabular} 
+\end{center}
+\caption{Matriz Confusión} 
+\label{tabla:matrix}
+\end{table}
+
+\subsection{Parte 5}
+Se seleccionaron los primeros 20 atributos en la tabla \ref{tabla:atributos} como podemos apreciar, los atributos corresponden en su gran mayoría a los que recurren con mayor frecuencia, los lemas graficados en la Parte 1 del obligatorio. Si realizamos un análisis según el tipo de atributo implementado, tenemos la siguiente información:
+\subsubsection{Atributos Positive-Negative}
+Los atributos que se utilizan con mayor frecuencia para este caso:
+\begin{itemize}
+  \item negative(malo)
+  \item positive(excelente)
+  \item positive(recomendable)
+  \item negative(aburrir)
+  \item positive(divertir)
+  \item positive(recomer)
+  \item positive(encantar)
+  \item positive(lindo)
+  \item negative(terminar)
+  \item negative(rato)
+\end{itemize}
+
+
+\begin{table}[!htb]
+\begin{center}
+\begin{tabular}{|l|c|c|} 
+\hline
+ \multicolumn{1}{|l}{Atributo}&
+ \multicolumn{1}{|c}{POS-NEG}&
+ \multicolumn{1}{|c|}{$\%$}
+\tabularnewline
+  \hline
+     subjetive\_neg(malo) = 1         &        neg : pos    &     26.4 : 1.0 \\ \hline
+          negative(malo) = True      &        neg : pos    &     24.0 : 1.0 \\ \hline
+     positive(excelente) = True      &        pos : neg    &     22.5 : 1.0 \\ \hline
+  positive(recomendable) = True      &        pos : neg    &     13.7 : 1.0 \\ \hline
+     subjetive\_neg(malo) = 2         &        neg : pos    &     10.8 : 1.0 \\ \hline
+       negative(aburrir) = True      &        neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(aburrir) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(absurdo) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
+      positive(divertir) = True      &        pos : neg    &      7.1 : 1.0 \\ \hline
+       positive(recomer) = True      &        pos : neg    &      6.4 : 1.0 \\ \hline
+      positive(encantar) = True      &        pos : neg    &      5.4 : 1.0 \\ \hline
+    subjetive\_neg(lento) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
+    subjetive\_neg(falta) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
+   subjetive\_neg(desear) = 1         &        neg : pos    &      4.9 : 1.0 \\ \hline
+     subjetive\_pos(vida) = 2         &        neg : pos    &      4.9 : 1.0 \\ \hline
+         positive(lindo) = True      &        pos : neg    &      3.3 : 1.0 \\ \hline
+      negative(terminar) = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
+          negative(rato) = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
+                no\_gusto = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
+  subjetive\_pos(familia) = 2         &        neg : pos    &      2.9 : 1.0 \\ \hline
+
+\end{tabular} 
+\end{center}
+\caption{Atributos} 
+\label{tabla:atributos}
+\end{table}
 
 
 
