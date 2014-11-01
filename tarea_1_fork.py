@@ -15,7 +15,7 @@ from sys import version
 #excel api
 from openpyxl import load_workbook
 from webservice import WebService
-from classification import Clasificator
+from Classification import Clasificator
 reload(sys)
 
 

@@ -60,7 +60,7 @@ En este presente documento se procede a la explicación, tanto de la implementac
 \newpage
 
 \section{Introduction}
-En la presente aplicación se trabajó en base a dos metodologías de procesamiento de datos, mediante el uso de WebServices y una aplicación local(LAN) del servico Freeling.
+En la presente aplicación se trabajó en base a dos metodologías de procesamiento de datos, mediante el uso de WebServices y una aplicación local(LAN) del servicio Freeling mediante sockets.
 Por lo tanto en la implementación contamos con dos modos de ejecución, esto puede ser útil para el caso de los usuarios que no cuenta con un servidor Freeling local, pero sí mediante una arquitectura orientada a servicios.
 Al pensar en ambos casos, tenemos la ventaja de que si no contamos con alguno de ellos, podemos utilizar el otro método.
 
@@ -70,7 +70,7 @@ Al pensar en ambos casos, tenemos la ventaja de que si no contamos con alguno de
 Para la correcta ejecución de la aplicación es necesario contar con el siguiente conjunto de librerías:
 \begin{itemize}
   \item suds :  Para utilizar la aplicación mediante Webservices, se trata de una librería que permite la creación de estructuras orientadas a webservices, utilizando el protocolo SOAP.
-  \item mathplotlib: Se utiliza para realizar las gráficas pertientes al requerimiento 4.b del laboratorio.
+  \item mathplotlib: Se utiliza para realizar las gráficas pertientes a los requerimientos del laboratorio.
   \item openpyxl : Librería utilizada para la lectura de archivos xls, para el caso en particular el archivo que contiene los comentarios a ser procesados.
 \end{itemize}
 
@@ -84,7 +84,7 @@ Los mismas pueden ser agregadas fácilmente utilizando pip o easy-install.
 
 \subsection{Freeling}\label{free}
 Para ejecutar la aplicación utilizando un servidor local, es necesario contar con la aplicación Freeling y ejecutarla en modo servidor, para ello se recurre a la siguiente orden vía línea de comandos:
-$analyze$ $-f$ $./config/es.cfg$ $--server$ $--port$ $50005$ $\&$
+$analyze$ $-f$ $./config/es.cfg$ $--flush$ $--server$ $--port$ $50005$ $\&$
 Donde es.cfg es la configuración general de Freeling para lograr el correcto procesamiento del léxico en cuestión, de esto se tratará en la sección 'Configuraciones Freeling'\ref{configFree}; 50005 es el puerto en el que el servidor escucha los pedidos.
 Una vez que se realizó este paso correctamente, podemos ejecutar nuestra aplicación Python. 
 
@@ -109,10 +109,16 @@ Estos fueron las configuraciones más importantes a tener en cuenta en el análi
 Para ejecutar la aplicación, únicamente se le debe brindar permisos de ejecución al archivo $tarea_1.py$, y mediante línea de comandos la siguiente orden:
 $./tarea_1.py$
 o $./tarea_1.py -w$ para ejecutarlo utilizando webservices anteriormente descripto.
-Como parámetro adicional se brinda la opción $-d$ la cual muestra las gráficas en tiempo de ejecución. Para proceder a ello se puede ejecutar el programa de la forma $./tarea_1.py -d$.
+\subsection{Parámetros}
+Se brinda una serie de parámetros adicionales para la ejecución de la tarea.
+\begin{itemize}
+  \item -d: Muestra las gráficas en tiempo de ejecución, con la posibilidad de redimensionar las ventanas, entre otras propiedades interesantes a tener en cuenta.
+  \item -v: Se utiliza para ejecutar la tarea en versión 1, es decir el programa se ejecuta utilizando la lista de palabras vacías de la primera entrega, no se genera filtro de lemas con el dominio del problema, los comentarios positivos corresponden a los valores 3,4 y 5.
+  \item -w: Modo webservice, se ejecuta la aplicación realizando requests a un servicio web.
+\end{itemize}
 
 Una aclaración importante, la aplicación se ha probado exclusivamente en ambiente UNIX, desde la instalación de Freeling hasta las librerías de Python, ante funcionamientos anómalos en plataformas Windows, se sugiere que el programa sea ejecutado en UNIX.
-Caso contrario de no disponer un entorno, igualmente puede ejecutarse el programa utilizando Webservices. Aunque el funcionamiento no es óptimo los resultados son semejantes.
+Caso contrario de no disponer un entorno, igualmente puede ejecutarse el programa utilizando webservices. Aunque el funcionamiento no es óptimo los resultados son semejantes.
 
 \section{Visualización}
 Se muestra la interacción del sistema, según el modo de ejecución.
@@ -126,35 +132,37 @@ Se muestra la interacción del sistema, según el modo de ejecución.
 
 
 \section{Implementación} \label{impl}
-Se procede a la descripción de la implementación del programa. Para ello se utilizaron dos clases básicas para las configuraciones:
+Se procede a la descripción de la implementación del programa. Para ello se utilizaron tres clases básicas para las configuraciones:
 \begin{enumerate}
    \item Utils : que se encuentra en el mismo archivo a ejecutar $tarea_1.py$, la misma se encarga de realizar operaciones de lectura y escritura en los archivos, así como el porcesamiento de los datos utilizando Freeling.
    \item WebService : la misma se encuentra en el archivo webservices.py, se utiliza para cargar las especificaciones del servicio web en cuestión, además de brindar la implementación de solicitud y procesamiento de del léxico. Básicamente devuelve una lista con todas las palabras con su respectivo tag, lema y probabilidad.
+   \item Classification : Esta clase es la responsable de todo lo relacionado con el clasificador de comentarios, utiliza el paquete nltk para generar un clasificador NaiveBayes.
  \end{enumerate} 
 
-A continuación se describe las funciones definidas en el archivo $tarea_1.py$, específicamente de la clase útils.
+A continuación se describe las funciones definidas en el archivo $tarea_1.py$, específicamente de la clase utils.
 
 
-\subsection{loadXLSFile} \label{xlslib}
-Encabezado: $def$ $loadXLSFile(self)$
+\subsection{tarea\_1.py}
+\subsubsection{loadXLSFile} \label{xlslib}
+Encabezado: $def$ loadXLSFile(self). \\
 Cuando se instancia la clase $Utils$, en sus atributos privados se encuentran ciertos parámetros que definen las condiciones a tener en cuenta para la lectura del archivo $.xlsx$, en particular el nombre del mismo $\_\_comment\_file$ y el rango de las celdas que deben ser procesadas($\_\_xls\_range$), básicamente utiliza la librería descrita en la sección anterior librería \ref{lib}, y devuelve como resultado el rango de celdas especificado por el parámetro en cuestión, el cual será iterado en la función main.
 
 
-\subsection{loadStopwords}\label{func:loadSW}
-Firma: $def$ $loadStopwords(self, Ver=2)$
+\subsubsection{loadStopwords}\label{func:loadSW}
+Firma: $def$ loadStopwords(self, Ver=2). \\
 En este caso se carga en un diccionario las palabras vacías que se suministran en el archivo $stopwords.txt$, se devuelve un diccionario para el rápido procesamiento posterior llevado a cabo. El parámetro $Ver$ con el valor en dos implica que se carga la lista de stopwords mejorada según el obligatorio 2, en caso contrario se procede a la carga con la lista brindada en la entrega anterior.
 
 
-\subsection{loadSubjetiveElems}
-Firma: $def$ $loadSubjetiveElems(self)$
+\subsubsection{loadSubjetiveElems}
+Firma: $def$ loadSubjetiveElems(self). \\
 Esta función carga el léxico proporcionado en el archivo $listaElementosSubjetivos.pl$, devolviendo un diccionario como estructura para su posterior procesamiento.
 
-\subsection{loadDomain}\label{func:loadDomain}
-Firma: $def$ $loadDomain(self)$
+\subsubsection{loadDomain}\label{func:loadDomain}
+Firma: $def$ loadDomain(self). \\
 Básicamente abre el archivo $resources/dominio.txt$, y carga en un diccionario las palabras consideradas dentro del dominio del cine. En caso de que el archivo no se encuentre en el directorio especificado, se procede a lanzar una excepción correspondiente a dicho error.
 
-\subsection{lematization\_freeling\_client}
-Firma: $def$ $lematization\_freeling\_client(self, comment)$.
+\subsubsection{lematization\_freeling\_client}
+Firma: $def$ lematization\_freeling\_client(self, comment). \\
 Argumentos:
 \begin{itemize}
   \item $comment$ : Comentario particular a ser procesado.
@@ -166,8 +174,24 @@ Su funcionalidad principal es tomar un comentario específico mediante una strin
 \end{itemize}
 
 
-\subsection{plot} \label{func:plot}
-Firma: $def$ $plot(self, listaPlot, n\_groups, filename, totalwords)$ \\
+\subsubsection{generateData}
+Firma: $def$ generateData(self, allWords, filename). \\
+Básicamente esta función se encarga de guardar en archivos con extensión $.csv$ las palabras procesadas durante la ejecución del programa. El parámetro allWords consiste en una lista de lemas que serán persistidos, mientras que $filename$ es el archivo destino. En la función principal del programa llamada $process$ se generan por medio de esta función los siguientes archivos:
+\begin{itemize}
+  \item negativeWords.csv : Contiene las palabras negativas encontradas en los comentarios.
+  \item positiveWords.csv : Análogo al primero, aplicado a palabras positivas.
+  \item allWords.csv : Se persisten todos los lemas involucrados en los comentarios. 
+\end{itemize}
+
+
+\subsubsection{generateStatisticData}
+Firma: $def$ generateStatisticData(self, allWords, posWords, negWords, t, n). \\
+Genera datos estadísticos para posterior análisis. Los parámetros $allWords$ consiste en una lista con todas las palabras, análogo para $posWords$ que son lemas positivos y $negWords$ lemas negativos, mientras que $t$ es la cantidad total de comentarios, $n$ la cantidad de comentarios negativos.
+En la función principal $process$ se genera un archivo que contiene datos para formular conclusiones estadísticas, el mismo se encuentra en el directorio $res$ nombrado $Data.txt$ .
+
+
+\subsubsection{plot} \label{func:plot}
+Firma: $def$ plot(self, listaPlot, n\_groups, filename, totalwords). \\
 Argumentos:
 \begin{itemize}
   \item listaPlot : Contiene una lista ordenada con la siguiente tupla de datos $(Palabra, Comentarios)$, donde $Palabra$ es el lema a graficar, y $Comentario$ es la cantidad de veces comentarios en la que $Palabra$ está presente. Notar que se contabiliza únicamente una vez la palabra por comentario, para evitar casos extremos que degraden el comportamiento del programa en cuestión, ej. Comentario = "Hola, hola, hola, ...", si se evalúa globalmente, puede perjudicar el estudio en cuestión.
@@ -187,9 +211,11 @@ En la implementación en cuestión se invoca cinco veces la presente función, g
 \end{itemize}
 
 
-\subsection{process}
+\subsubsection{process}
 Este bloque se encarga de tomar las funciones anteriormente mencionadas y procesar el algoritmo de forma adecuada.
 Se presenta a continuación un pseudo-código de la implementación.
+
+
 
 \begin{algorithmic}
   \State $xls \gets cargar\_comentarios()$
@@ -209,6 +235,81 @@ Se presenta a continuación un pseudo-código de la implementación.
 Las primeras cuatro líneas se compactan en la función de instanciación del objeto Utils, cargando entonces las palabras vacías, el dominio del problema, la lista de palabras subjetivas y los comentarios.
 La simplicidad que brinda Python para el procesamiento de datos, básicamente resume el pseudocódigo en la implementación en sí misma, salvo detalles menores que requieren un procesamiento refinado.
 
+\subsection{Classification.py}
+Implementa la clase $Classificator$ encargada de clasificar los comentarios. A continuación se detallan las funciones que brinda dicha clase.
+
+\subsubsection{loadComments}
+Firma : $def$ loadComments(self). \\
+Carga los comentarios en memoria a partir del archivo $.xlsx$ brindado, para realizar un procesamiento dinámico posteriormente, además de utilizar heurísticas que involucran el cuerpo del comentario y no el post procesamiento utilizando tokenización y análisis morfosintáctico.
+
+\subsubsection{generate\_train\_set}
+Firma : $def$ generate\_train\_set(self, large, prop, train\_name, test\_name). \\
+Genera a través de la función $get\_train\_test\_set$ los índices de los comentarios que formarán parte del conjunto de comentarios de entrenamiento y test. A dichos índices los persiste en los archivos con nombre pasados por parámetro $train\_name$ y $test_name$ respectivamente. Los parámetros $large$ y $prop$ son la cantidad de comentarios en total y la proporción para el conjunto de entrenamiento(70 \%) respectivamente.
+
+\subsubsection{get\_train\_test\_set}
+Firma : $def$ get\_train\_test\_set(self, large, Prop). \\
+Devuelve una lista con índices de los comentarios que serán incluídos en los conjuntos de entrenamiento y testing, se utilizan los parámetros $large$ y $Prop$ para determinar el tope de los comentarios y la proporción para el conjunto de entrenamiento. La lista que se genera se realiza de forma aleatoria, utilizando la clase $random$ que brinda python.
+
+\subsubsection{generateHeuristic}
+Firma: $def$ generateHeuristic(self, com). \\
+Devuelve $True$ o $False$ en caso que el comentario $com$ posea un trigrama que forme parte de la heurística.
+
+
+\subsubsection{feature}
+Firma : $def$ feature(self, N, pcomment, comment, positive, negative, posSub, negSub). \\
+Devuelve un diccionario con los atributos pertinentes al comentario $pcomment$, para generar los atributos se utiliza una lista de lemas generado anteriormente por la clase $Utils$ con la función $process$, consiste en la lista de lemas obtenida luego del análisis morfosintáctico. Para agregar atributos al comentario se tienen en cuenta tres tipos de atributos.
+\begin{itemize}
+  \item positive(lema) negative(lema) : Se generan a partir de los parámetros $positive$ y $negative$, que son diccionarios con los lemas positivos y negativos preprocesados, el atributo consiste básicamente si el comentario posee un lema de alguna de esos diccionarios, caso contrario también se agrega el atributo indicando que no lo posee. Por ejemplo el comentario $Bueno.$, supongamos que el lema "bueno" está incluído en el diccionario $positive$, por lo tanto dicho comentario obtendrá el atributo $positive(bueno) = True$.
+  \item subjetive\_pos(lema) subjetive\_negative(lema) : El comentario se adjudicará esta clase de atributos si el mismo posee un lema que se encuentra en el diccionario de elementos subjetivos, tanto positivo como negativo. Supongamos que en el análisis morfosintáctico un lema del comentario es "malo", y dicho lema se encuentra en uno de los diccionarios $posSub$ o $negSub$, entonces el comentario será marcado con el atributo correspondiente $subjetive\_pos(lema)$ o $subjetive\_neg(lema)$ correspondiente a los diccionarios anteriores.
+  \item $no\_gusto$ :  El comentario posee este atributo si se encuentra en $pcomentario$ alguna de las heurísticas planteadas, como por ejemplo "no me gusto", en caso de incluir una secuencia predeterminada que se define en $generateHeuristic$. Básicamente son trigramas que se estudiaron y se llegaron a la conclusión que aportan significancia estadística cuando se evalúan comentarios negativos.
+\end{itemize}
+
+
+\subsubsection{load\_train\_test\_set}
+Firma: $def$ load\_train\_test\_set(self, train="./resources/train.txt", test="./resources/test.txt"). \\
+Genera listas que contienen los índices de los comentarios incluídos en los conjuntos de entrenamiento y testing. Los parámetros $train$ y $test$ hacen referencia a la ruta de los archivos que contienen la información.
+
+\subsubsection{saveMetrics}
+Firma: $def$ saveMetrics(self, toSave, file\_name="./res/Metrics.txt"). \\
+Dadas las métricas de calidad, como ser $accuracy$, $Precision$ y $Recall$ además de la matriz de confusión, son guardadas en el archivo $file\_name$. En la función principal $process$ de la presente clase, se persiste los datos automáticamente en el directorio $res$ con el nombre de archivo $Metrics.txt$.
+
+
+\subsubsection{process}
+Firma: $def$ process(self, posWords, negWords, posI, negI, tokenizedComm, train\_file="./resources/train.txt", test\_file="./resources/test.txt"). \\
+Esta función se encarga básicamente de todo el procesamiento involucrando todas las funciones anteriormente mencionadas. Los pasos generados se detallan a continuación.
+\begin{itemize}
+  \item Se cargan en memoria los comentarios del archivo $.xlsx$.
+  \item Se cargan en listas los conjuntos de entrenamiento y testing previamente generados.
+  \item Con todos los comentarios que pertenecen al conjunto de entrenamiento, se generan los atributos y se almacenan en una lista que posteriormente será utilizada para instanciar el clasificador.
+  \item Creación del clasificador, utilizando la lista mencionada en el paso anterior.
+  \item Dado el conjunto de testing se clasifican los comentarios utilizando el clasificador, y se almacenan los resultados en diccionarios para el posterior análisis de métricas de calidad.
+  \item Se generan métricas de calidad, la matriz de confusión y se imprimen los 20 atributos más utilizados.
+\end{itemize}
+
+Los parámetros $posWords$ y $negWords$ son diccionarios que contienen los lemas positivos y negativos procesados anteriormente por la clase $Utils$, $posI$ y $negI$ son la intersección de los lemas positivos y negativos con los elementos subjetivos. Mientras que $tokenizedComm$ es un diccionario con la lista de lemas para cada comentario procesado, se utiliza para evitar repetir la tarea de análisis morfosintáctico y aumentar el tiempo de respuesta del programa. Finalmente $train\_file$ y $test\_file$ contienen las direcciones de los archivos que contienen los índices de los comentarios que pertenecen al conjunto de entrenamiento y testeo.
+
+
+\subsubsection{main}
+Genera los 30 casos de prueba que se tendrán en cuenta para el análisis estadístico generado por el módulo $Statistics.py$.
+
+
+\subsection{Statistics.py}
+
+\subsubsection{doMetrics}
+Firma: $def$ doMetrics(Display=False, WS=False, Ver=2). \\
+Básicamente realiza el proceso de análisis morfosintáctico utilizando la clase $Utils$ y posteriormente clasifica los comentarios con los 30 conjuntos de entrenamiento y test, persisitiendo los datos obtenidos en el directorio $res/statistics$
+
+\subsubsection{generateFile}
+Firma: $def$ generateFile(metrics, outfile). \\
+Dadas las métricas de calidad para los 30 casos de prueba $metrics$ se persisten las mismas en el archivo $outfile$, generando un archivo de salida $.csv$ que contienen las métricas $accuracy$, $precision$ y $recall$, además como los valores promedio para todos los casos.
+
+\subsubsection{main}
+Utiliza las dos funciones anteriormente mencionadas para generar las métricas de los 30 casos de prueba y persistirlos en los archivos $tabla1.csv$ y $tabla2.csv$. Archivos generados:
+\begin{itemize}
+  \item $tabla1.csv$: Contiene las métricas para los 30 casos de prueba procesados, se consideran los comentarios positivos con puntuación 4 y 5, y se utiliza el dominio y la lista mejorada de stopwords para un refinamiento de los lemas a procesar.
+  \item $tabla2.csv$: Análogo al caso anterior pero los comentarios positivos poseen puntuación 3,4 y 5, no se utiliza dominio para filtrar lemas, ni la lista mejorada de stopwords. Básicamente se utiliza la versión 1 de la tarea para el procesamiento morfosintáctico.
+\end{itemize}
+
 
 \subsection{Eficiencia}
 La complejidad del un programa se reduce a las estructuras utilizadas, la correcta utilización de las mismas implica un impacto directo sobre la eficiencia del programa. Para ello se utilizaron diccionarios para almacenar las palabras contenidas en los comentarios, de esta forma poder acceder en orden 1. La búsqueda se reduce a investigar si la llave(key) de indexado se encuentra presente en el diccionario. Por lo contrario, utilizando listas, la performance al procesar una lista mayor de comentarios tiene un impacto negativo en tiempos de ejecución.
@@ -222,7 +323,7 @@ En las secciones anteriores se ha detallado aspectos de inicialización del ambi
 
 
 \subsection{Información CORPUS}
-Para esta consigna se utilizó la librería $openpyxl$ ya citada en la sección Librerías [\ref{lib}]. Básicamente se utilizó la función $loadXLSFile$ descrita en la sección Implementación [\ref{xlslib}], particularmente no se realizó un mapeo a memoria de los comentarios y sus respectivos puntajes, debido a que almacenar los mismos en estructuras internas como ser listas o diccionarios implica contar con memoria extra para ejecutar la aplicación. En lugar de ello se recorre el archivo .xls brindado, haciendo lecturas del archivo en sí mismo, y no realizando el almacenamiento para su posterior lectura. Por lo tanto la información no se extrae completamente, pero sí parcialmente, con el fin de mejorar el rendimiento tanto en consumo de memoria como en la velocidad de ejecución del programa.
+Para esta consigna se utilizó la librería $openpyxl$ ya citada en la sección Librerías [\ref{lib}]. Básicamente se utilizó la función $loadXLSFile$ descrita en la sección Implementación [\ref{xlslib}], particularmente no se realizó un mapeo a memoria de los comentarios y sus respectivos puntajes, debido a que almacenar los mismos en estructuras internas como ser listas o diccionarios implica contar con memoria extra para ejecutar la aplicación. En lugar de ello se recorre el archivo $.xls$ brindado, haciendo lecturas del archivo en sí mismo, y no realizando el almacenamiento para su posterior lectura. Por lo tanto la información no se extrae completamente, pero sí parcialmente, con el fin de mejorar el rendimiento tanto en consumo de memoria como en la velocidad de ejecución del programa.
 La lectura se realiza por medio de la función $loadXLSFile$ y posteriormente se recorre en la función $main$, 'lematizando' y realizando un análisis morfosintáctico, pero ello hace parte de la siguiente subsección.
 
 
