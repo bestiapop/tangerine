@@ -16,8 +16,6 @@ class Clasificator:
         self.__xls_range = 'G3:H875'
         self.__resources = './resources/'
         self.__comment_file = self.__resources + 'Comentarios_Peliculas.xlsx'
-        self.__train_file = './resources/train.txt'
-        self.__test_file = './resources/test.txt'
         self. __res = 'res/'
         self.Exc = 0
         if Ver == 2:
@@ -42,13 +40,13 @@ class Clasificator:
 
         return comments
 
-    def generate_train_set(self, large, prop):
+    def generate_train_set(self, large, prop, train_name, test_name):
         (train, test) = self.get_train_test_set(large, prop)
         train = [str(i) for i in train]
         test = [str(i) for i in test]
-        with open(self.__train_file, 'w') as save:
+        with open(train_name, 'w') as save:
             save.write("\n".join(train))
-        with open(self.__test_file, 'w') as save:
+        with open(test_name, 'w') as save:
             save.write("\n".join(test))
 
     def feature(self, N, pcomment, comment, positive, negative, posSub, negSub):
@@ -94,15 +92,16 @@ class Clasificator:
         test = list(set(suc) - set(train))
         return (train, test)
 
-    def load_train_test_set(self):
+    def load_train_test_set(self, train="./resources/train.txt",
+        test="./resources/test.txt"):
         train_list = []
         test_list = []
-        with open(self.__train_file) as load:
+        with open(train) as load:
             for line in load:
                 if line.rstrip():
                     train_list.append(int(line.rstrip()))
 
-        with open(self.__test_file) as load_test:
+        with open(test) as load_test:
             for line in load_test:
                 if line.rstrip():
                     test_list.append(int(line.rstrip()))
@@ -118,17 +117,18 @@ class Clasificator:
                 return True
         return False
 
-    def saveMetrics(self, toSave):
-        saveFile = open(self.__res + 'Metrics.txt', 'w')
+    def saveMetrics(self, toSave, file_name="./res/Metrics.txt"):
+        saveFile = open(file_name, 'w')
         save = ''
         for k in sorted(toSave.keys()):
             save = save + k + ' : ' + str(toSave[k]) + '\n'
         saveFile.write(save)
         saveFile.close
 
-    def process(self, posWords, negWords, posI, negI, tokenizedComm):
+    def process(self, posWords, negWords, posI, negI, tokenizedComm,
+        train_file="./resources/train.txt", test_file="./resources/test.txt"):
         comments = self.loadComments()
-        (train, test) = self.load_train_test_set()
+        (train, test) = self.load_train_test_set(train_file, test_file)
 
         N = 20
         train_set = []
@@ -211,7 +211,14 @@ class Clasificator:
         for m in sorted(Metrics.keys()):
             print m, Metrics[m]
 
-        self.saveMetrics(Metrics)
+        num = [accuracy, pPos, rPos, pNeg, rNeg]
+        return (Metrics, num)
+        #self.saveMetrics(Metrics)
 
 if __name__ == "__main__":
     c = Clasificator()
+    coments = c.loadComments()
+    for i in range(0, 30):
+        train = "./resources/statistic/train" + str(i) + ".txt"
+        test = "./resources/statistic/test" + str(i) + ".txt"
+        c.generate_train_set(len(coments), 0.7, train, test)

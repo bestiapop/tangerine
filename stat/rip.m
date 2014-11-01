@@ -1,0 +1,13 @@
+function rip(path)
+	Data=dlmread(path)
+	Desv_std_acc= std(Data(:,2),1)
+	Desv_std_pp= std(Data(:,3),1)
+	Desv_std_rp= std(Data(:,4),1)
+	Desv_std_pn= std(Data(:,5),1)
+	Desv_std_rn= std(Data(:,6),1)
+	DA1=Dagostino(Data(:,2)')
+	DA2=Dagostino(Data(:,3)')
+	DA3=Dagostino(Data(:,4)')
+	DA4=Dagostino(Data(:,5)')
+	DA5=Dagostino(Data(:,6)')
+endfunction

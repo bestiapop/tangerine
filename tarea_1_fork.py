@@ -51,7 +51,7 @@ class Utils:
         self.domain = None
         # if version 2 then exclude commets with value=3, and filter words
         if self.Ver == 2:
-            print "domain 2"
+            #print "domain 2"
             self.Exc = 3
             self.domain = self.loadDomain()
 
@@ -289,7 +289,7 @@ class Utils:
                 else:
                     insert = mydicpos
                 #lematize and filter F words
-                if ws:
+                if self.ws:
                     lista = webService.lematization_freeling_ws(valor.value,
                         self.stopwords)
                 else:
@@ -405,4 +405,7 @@ if __name__ == "__main__":
     utils = Utils(Display=display, WS=ws, Ver=ver)
     classify = Clasificator(Ver=ver)
     (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
-    classify.process(posWords, negWords, posI, negI, tokenizedComm)
+    (train, test) = classify.load_train_test_set()
+    (Metrics, num) = classify.process(posWords, negWords, posI, negI,
+        tokenizedComm)
+    classify.saveMetrics(Metrics)
