@@ -407,6 +407,9 @@ if __name__ == "__main__":
     classify = Clasificator(Ver=ver)
     (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
     (train, test) = classify.load_train_test_set()
+    #print posWords[:20]
+    #print ""
+    #print negWords[:20]
     (Metrics, num) = classify.process(posWords, negWords, posI, negI,
         tokenizedComm)
     classify.saveMetrics(Metrics)

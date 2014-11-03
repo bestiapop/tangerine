@@ -8,7 +8,7 @@ import random
 import collections
 import nltk
 from nltk.metrics import ConfusionMatrix
-
+from nltk.collocations import *
 
 class Clasificator:
 
@@ -55,26 +55,21 @@ class Clasificator:
      feature positive(n):[True, False] si la palabra positiva n se encuentra en
      el comentario, analogo para negative."""
         features = {}
-        # custom feature
-        cant_pos = 0
-        cant_neg = 0
         # features top N
         for i in range(0, N - 1):
             if positive[i] in comment:
                 features["positive(%s)" % positive[i]] = True
-                cant_pos = cant_pos + 1
             else:
                 features["positive(%s)" % positive[i]] = False
             if negative[i] in comment:
                 features["negative(%s)" % negative[i]] = True
-                cant_neg = cant_neg + 1
             else:
                 features["negative(%s)" % negative[i]] = False
         # features subjetive lists
-        for word in comment:
-            if word in posSub:
+        for word in set(comment):
+            if word in posSub and comment.count(word) > 0:
                 features["subjetive_pos(%s)" % word] = comment.count(word)
-            if word in negSub:
+            if word in negSub and comment.count(word) > 0:
                 features["subjetive_neg(%s)" % word] = comment.count(word)
 
         #custom features
@@ -110,9 +105,12 @@ class Clasificator:
         return (train_list, test_list)
 
     def generateHeuristic(self, com):
-        heu = ["gusto", "gustó", "vi", "ví"]
+        heu = ["no me gusto", "no me gustó", "muy mala", "no vale la pena",
+            "perdida de tiempo", "muy malo", "no recomendable"]
+        #heu = ["gusto", "gustó", "vi", "ví", "la pena"]
         for elem in heu:
-            reg = r".*no (\w+) %s.*" % elem
+            #reg = r".*no (\w+) %s.*" % elem
+            reg = r".*%s.*" % elem
             if re.match(reg, com, re.IGNORECASE):
                 return True
         return False
@@ -132,6 +130,7 @@ class Clasificator:
 
         N = 20
         train_set = []
+
         for i in train:
             (com, value) = comments[i]
             if value != self.Exc:
@@ -144,6 +143,7 @@ class Clasificator:
                     train_set.append((self.feature(N, com, splitted, posWords,
                         negWords, posI, negI), "pos"))
 
+        # clasificador
         classifier = nltk.NaiveBayesClassifier.train(train_set)
 
         # Para testing se han excluido comentarios con puntuacion 3, es decir
@@ -189,7 +189,7 @@ class Clasificator:
                 if(message == "ERROR"):
                     errorComments.append((com, value))
 
-        classifier.show_most_informative_features(20)
+        classifier.show_most_informative_features(50)
 
         # confusion matrix
         cm = ConfusionMatrix(ref_list, test_list)
@@ -222,3 +222,4 @@ if __name__ == "__main__":
         train = "./resources/statistic/train" + str(i) + ".txt"
         test = "./resources/statistic/test" + str(i) + ".txt"
         c.generate_train_set(len(coments), 0.7, train, test)
+

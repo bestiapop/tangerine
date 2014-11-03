@@ -413,11 +413,11 @@ Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de l
     \multicolumn{1}{|c}{$DA$}&
     \multicolumn{1}{|c}{$\sigma$}&
     \multicolumn{1}{|c|}{$DA$} \\ \hline
-    ACC & 0.026003 & 0.28689 & 0.016380 & 0.27771 \\ \hline
-    PP & 0.027385 & 0.28140 & 0.021212 & 0.27720 \\ \hline
-    RP & 0.024598 & 0.27735 & 0.017131 & 0.28631 \\ \hline
-    PN & 0.074322 & 0.27949 & 0.052173 & 0.27693 \\ \hline
-    RN & 0.065168 & 0.27797 & 0.054888 & 0.27498 \\ \hline
+    ACC & 0.029525 & 0.27678 & 0.027009 & 0.27709 \\ \hline
+    PP & 0.024305 & 0.27849 & 0.022482 & 0.26285 \\ \hline
+    RP & 0.033259 & 0.28061 & 0.030635 & 0.27720 \\ \hline
+    PN & 0.067953 & 0.27845 & 0.068971 & 0.27332 \\ \hline
+    RN & 0.047179 & 0.28124 & 0.065903 & 0.27842 \\ \hline
     \end{tabular}
 \end{center}
     \caption{Datos Estadísticos}
@@ -472,11 +472,11 @@ Para esta subsección posteriormente a un análisis estadístico que involucra v
 
 Se establece la separación de conjuntos en comentarios negativos y positivos, evaluado $Recall$ y $Precision$.
 \begin{itemize}
-  \item Accuracy: 0.8078
-  \item Precision Positive: 0.8474
-  \item Recall Positive: 0.8982
-  \item Precision Negative: 0.6730
-  \item Recall Negative: 0.5645
+  \item Accuracy: 0.8165
+  \item Precision Positive: 0.8531
+  \item Recall Positive: 0.9041
+  \item Precision Negative: 0.6923
+  \item Recall Negative: 0.5806
 \end{itemize}
 
 La matriz de confusión pertinente queda representada en la tabla \ref{tabla:matrix}, los valores en la diagonal indican los casos Verdadero-Positivo, mientras que cualquier otra celda que no corresponde a la diagonal indica que la clasificación del comentario es errónea. Como podemos observar, la correcta clasificación de los comentarios existe en mayor proporción cuando los comentarios poseen una valoración positiva. La proporción de comentarios negativos correctamente clasificados apenas supera el $50 \%$, lo cual implica que el rendimiento del clasificador es estrechamente superior en el momento de evaluar comentarios positivos.
@@ -503,8 +503,8 @@ Vale la pena destacar que existe anomalía en ciertos comentarios, como no corre
  \multicolumn{1}{|l|}{NEG}
 \tabularnewline
   \hline
-  POS & 150 & 17 \\ \hline
-  NEG & 27 & 35 \\ \hline
+  POS & 151 & 16 \\ \hline
+  NEG & 26 & 36 \\ \hline
 \end{tabular} 
 \end{center}
 \caption{Matriz Confusión} 
@@ -528,6 +528,19 @@ Los atributos que se utilizan con mayor frecuencia para este caso:
   \item negative(rato)
 \end{itemize}
 
+\subsubsection{Atributos Subjetive}
+\begin{itemize}
+  \item subjetive\_neg(malo) = 1
+  \item subjetive\_neg(malo) = 2
+  \item subjetive\_neg(aburrir) = 1
+  \item subjetive\_neg(absurdo) = 1
+  \item subjetive\_neg(lento) = 1
+  \item subjetive\_neg(falta) = 1
+  \item subjetive\_neg(desear) = 1
+  \item subjetive\_pos(vida) = 2
+  \item subjetive\_pos(familia) = 2
+\end{itemize}
+
 
 \begin{table}[!htb]
 \begin{center}
@@ -538,32 +551,44 @@ Los atributos que se utilizan con mayor frecuencia para este caso:
  \multicolumn{1}{|c|}{$\%$}
 \tabularnewline
   \hline
-     subjetive\_neg(malo) = 1         &        neg : pos    &     26.4 : 1.0 \\ \hline
-          negative(malo) = True      &        neg : pos    &     24.0 : 1.0 \\ \hline
-     positive(excelente) = True      &        pos : neg    &     22.5 : 1.0 \\ \hline
-  positive(recomendable) = True      &        pos : neg    &     13.7 : 1.0 \\ \hline
-     subjetive\_neg(malo) = 2         &        neg : pos    &     10.8 : 1.0 \\ \hline
-       negative(aburrir) = True      &        neg : pos    &      8.8 : 1.0 \\ \hline
-  subjetive\_neg(aburrir) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
-  subjetive\_neg(absurdo) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
-      positive(divertir) = True      &        pos : neg    &      7.1 : 1.0 \\ \hline
-       positive(recomer) = True      &        pos : neg    &      6.4 : 1.0 \\ \hline
-      positive(encantar) = True      &        pos : neg    &      5.4 : 1.0 \\ \hline
-    subjetive\_neg(lento) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
-    subjetive\_neg(falta) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
-   subjetive\_neg(desear) = 1         &        neg : pos    &      4.9 : 1.0 \\ \hline
-     subjetive\_pos(vida) = 2         &        neg : pos    &      4.9 : 1.0 \\ \hline
-         positive(lindo) = True      &        pos : neg    &      3.3 : 1.0 \\ \hline
-      negative(terminar) = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
-          negative(rato) = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
-                no\_gusto = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
-  subjetive\_pos(familia) = 2         &        neg : pos    &      2.9 : 1.0 \\ \hline
+subjetive\_neg(malo) = 1           &      neg : pos    &     26.4 : 1.0 \\ \hline
+          negative(malo) = True    &          neg : pos    &     24.0 : 1.0 \\ \hline
+     positive(excelente) = True    &          pos : neg    &     22.5 : 1.0 \\ \hline
+                no\_gusto = True    &          neg : pos    &     20.6 : 1.0 \\ \hline
+  positive(recomendable) = True    &          pos : neg    &     13.7 : 1.0 \\ \hline
+     subjetive\_neg(malo) = 2       &          neg : pos    &     10.8 : 1.0 \\ \hline
+       negative(aburrir) = True    &          neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(aburrir) = 1       &          neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(absurdo) = 1       &          neg : pos    &      8.8 : 1.0 \\ \hline
+      positive(divertir) = True    &          pos : neg    &      7.1 : 1.0 \\ \hline
+       positive(recomer) = True    &          pos : neg    &      6.4 : 1.0 \\ \hline
+      positive(encantar) = True    &          pos : neg    &      5.4 : 1.0 \\ \hline
+    subjetive\_neg(lento) = 1       &          neg : pos    &      5.3 : 1.0 \\ \hline
+    subjetive\_neg(falta) = 1       &          neg : pos    &      5.3 : 1.0 \\ \hline
+   subjetive\_neg(desear) = 1       &          neg : pos    &      4.9 : 1.0 \\ \hline
+     subjetive\_pos(vida) = 2       &          neg : pos    &      4.9 : 1.0 \\ \hline
+         positive(lindo) = True    &          pos : neg    &      3.3 : 1.0 \\ \hline
+      negative(terminar) = True    &          neg : pos    &      2.9 : 1.0 \\ \hline
+          negative(rato) = True    &          neg : pos    &      2.9 : 1.0 \\ \hline
+  subjetive\_pos(familia) = 2       &          neg : pos    &      2.9 : 1.0 \\ \hline
+
 
 \end{tabular} 
 \end{center}
 \caption{Atributos} 
 \label{tabla:atributos}
 \end{table}
+
+Los términos más utilizados por los comentaristas en comentarios negativos sin lugar a dudas son "malo","aburrir" y "absurdo", a tal punto que "malo" aplica en dos atributos, los subjetivos y positive-negative, además en los primeros aparecen con gran frecuencia una y dos veces en los comentarios, sin embargo no tienen relevancia los lemas "gustar", "quedar" y "año", ubicados en 2,3 y 4 lugar en la lista de palabras negativas con mayor frecuencia. Esto tal vez implica que dichos lemas no tengan un aporte significativo cuando se trata de comentarios negativos, el primero(gustar) probablemente aparece que frecuencia en comentarios cuyo antecesor sea una negación y por ende pondera en comentarios negativos. Si se excluye el lema "año", puede mejorar incluso el clasificador.
+Para los comentarios positivos tenemos "excelente", "recomendable" y "divertir", aparecen en las posiciones 1, 3 y 6 de los lemas con mayor frecuencia en el análisis morfológico, sin embargo los lemas de la posición 2 y 5 no pueden ser descartados, ya que en el presente conjunto no aportan significancia estadística pero en cualquier otro conjunto el aporte puede ser sustancial.
+Los datos en la tabla son coherentes con los lemas más utilizados tanto para comentarios positivos como negativos. La funcion $show\_most\_informative\_features$ brinda la información necesaria a considerar en el momento de evaluar comentarios, a partir de estos atributos podemos llegar a la conclusión que el aporte del atributo $subjetive\_neg(malo)$ es de aproximadamente un cuarto, esto implica que si un comentario contiene este lema, es muy probable que al clasificarlo se lo valore como negativo, lo cual es coherente con el tipo de comentarios en general, excepto si se trata de comentarios que actúan como respuesta a usuarios, por ejemplo "@usuario, no me pareció una película mala.", en este caso el comentario puede poseer una valoración positiva, pero irremediablemente el clasificador por ponderar el lema malo seguramente clasifique dicho comentario como negativo.
+Las métricas de calidad indican que el clasificador tiene problemas evaluando comentarios negativos. Existen diversos factores para esto que se enumerarán a continuación.
+\begin{itemize}
+  \item En su totalidad tenemos 192 comentarios negativos, de los cuales evaluamos 62. Entonces estamos ante un problema de que no contamos con los comentarios suficientes para entrenar un clasificador de forma adecuada. Si observamos proporciones estamos evaluando un 32 \% de los comentarios, es decir que el método de selección aleatorio es prácticamente uniforme(utilizamos 70\% de los comentarios para el conjunto de entrenamiento). Descartando el método de selección como fuente de problema, concluímos que efectivamente el problema a considerar sería la cantidad de comentarios negativos dado el CORPUS no es suficiente para obtener buenas métricas para el clasificador.
+  \item Lemas por sí solos no aportan lo suficiente, lo que no permite una evaluación precisa del clasificador. Fundamentalmente la coherencia entre el comentario y la puntuación depende de la relación entre los lemas presentes, involucra un contexto en muchas ocasiones poco predecible. Esto se debe a que existen atributos los cuales consideramos positivos que forman parte de un comentario negativo y viceversa. Esto implica que la evaluación depende del contexto y la relación de los lemas presentes, factores externos como ser frases con alto contenido irónico puede inducir al clasificador a evaluar de formar errónea un comentario. Lo último es complejo, implica el uso de puntuaciones que pueden cambiar totalmente el significado de un comentario, y esto no se evalúan únicamente utilizando lemas por separado.
+\end{itemize}
+Ambos puntos, tanto la carencia de comentarios negativos para entrenar correctamente al clasificador, como un contexto incierto conllevan a evaluar correctamente 56 \% de los comentarios negativos, una cifra baja aunque en contextos similares con CORPUS distintos esta métrica suele ser peor.
+Sin embargo cuando tratamos de evaluar comentarios positivos, la métrica es claramente favorable, esto es $Recall$ aproximado a 90\%, sin lugar a dudas para este tipo de comentarios tiene una efectividad relativamente alta. Claro está un $Precision$ menor, debido a que la cantidad de comentarios negativos evaluados como positivos es superior a la cantidad de comentarios positivos evaluados incorrectamente. En cambio $Precision$ para comentarios negativo es superior a $Recall$, puesto que el clasificador evalúa incorrectamente comentarios positivos con un margen muy pequeño(10\%).
 
 
 
