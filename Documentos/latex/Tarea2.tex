@@ -359,12 +359,12 @@ Los atributos seleccionados fueron los siguientes:
   \item $subjetive\_neg(lema)$ : Análogo al anterior aplicado a la lista de elementos subjetivos negativos.
   \item $no\_gusto$ : Una heurística detectada es que en una gran proporción de comentarios negativos a procesar, poseen términos afectivos positivos, como ser 'gustó', sin embargo están contenidos en un contexto semejante a 'no me gustó' o semejante. Para ello se procedió a evaluar 2 palabras anteriores a los términos afectivos positivos, y en caso de encontrarse con una negación, se agrega el atributo mencionado. Nuevamente un atributo binario, demostrando la presencia o no de dicha heurística en el comentario.
 \end{itemize}
-Los atributos se analizaron con una selección aleatoria de comentarios, con la proporción requerida por la letra del obligatorio. Se realizaron pruebas con conjuntos distintos y se realizó un análisis estadístico de los datos, principalmente si el comportamiento del conjunto es normal, para ello se utilizaron test de normalidad de DAgostino y ejecutaron sobre 30 conjuntos distintos, ya que con dicho valor agrega un significado estadístico relevante. Si bien la letra del problema no requiere este procedimiento, se consideró oportuno observar si el conjunto seleccionado tiene impacto positivo o negativo en el momento de evaluar la calidad del clasificador. Para eso consideraremos la desviación estándar en los datos, así como la media de los valores $precision$ y $recall$, así como también $accuracy$. En el caso que los conjuntos seleccionados de forma aleatoria se comportan siguiendo una distribución normal, podemos establecer una cota en los atributos de calidad a evaluar, de esta forma también podemos asegurar que en promedio la calidad del clasificador es semejante, cualquiera sea el conjunto de datos tomado como referencia, con un márgen de error acotado.
+Los atributos se analizaron con una selección aleatoria de comentarios, con la proporción requerida por la letra del obligatorio. Se realizaron pruebas con conjuntos distintos y se realizó un análisis estadístico de los datos, principalmente si el comportamiento del conjunto es normal, para ello se utilizaron test de normalidad de DAgostino y ejecutaron sobre 30 conjuntos distintos, ya que con dicho valor agrega un significado estadístico relevante. Si bien la letra del problema no requiere este procedimiento, se consideró oportuno observar si el conjunto seleccionado tiene impacto positivo o negativo en el momento de evaluar la calidad del clasificador. Para eso consideraremos la desviación estándar en los datos, así como la media de los valores $precision$ y $recall$, así como también $accuracy$. En el caso que los conjuntos seleccionados de forma aleatoria se comportan siguiendo una distribución normal, podemos establecer una cota en los atributos de calidad a evaluar, de esta forma también podemos asegurar que en promedio la calidad del clasificador es semejante, cualquiera sea el conjunto de datos tomado como referencia, con un margen de error acotado.
 Además para evaluar la calidad de las soluciones, no es suficiente tratar con un conjunto particular, puede ocurrir que al seleccionar un conjunto cualquiera, con la solución propuesta los atributos de calidad sean óptimos, pero no para un caso global. Entonces evaluar la solución sobre una cantidad significativa de conjuntos si brinda datos significativos sobre el comportamiento del clasificador de forma global y no particular.
 
 
 \subsection{Parte 3 :}
-Para esta sección utilizamos el coonjunto de libreríás $nltk$ para generar un clasificador. Para ello se creó una clase llamada $classification.py$ que cuenta con las funciones mencionadas en el apartado de la arquitectura del sistema. Básicamente las funciones principales a tratar en esta clase son las siguientes:
+Para esta sección utilizamos el conjunto de librerías $nltk$ para generar un clasificador. Para ello se creó una clase llamada $Classification.py$ que cuenta con las funciones mencionadas en el apartado de la arquitectura del sistema. Básicamente las funciones principales a tratar en esta clase son las siguientes:
 \begin{itemize}
   \item $generate\_train\_set$
   \item $feature$
@@ -379,9 +379,9 @@ La generación del conjunto de entrenamiento se realizó de forma aleatoria, par
 \nprounddigits{3}
 
 \subsection{Estadístico} \label{sub:estad}
-Para la obtención de los resultados, se implementó el módulo $Statistics.py$, el mismo utiliza los módulos $tarea_1.py$ y $classification.py$, toma los 30 conjuntos de entrenamiento anteriormente generados y clasifica los comentarios según los mismos. Además posee la funcionalidad de generar las tablas presentes en esta sección.
-Se obtuvieron los siguientes resultados[\ref{tabla:1}] generando 30 conjuntos aleatorios de entrenamiento y test, los resultados obtenidos implican que el $accuracy$ del clasificador es de aproximadamente 80\%, el mejor caso se obtuvo en el conjunto de número 25, donde el $accuracy$ se aproximó a un 84 \%. Este estudio demuestra en un caso global, ya que con una cantidad apreciable de conjuntos distintos podemos obtener significancia estadística en el momento de evaluar el clasificador en forma genérica.
-En la tabla \ref{tabla:2} tenemos los resultados incluyendo las puntuaciones 3 como comentarios positivos. Intuitivamente se podría decir que eliminando los comentarios con puntuación 3 tanto para entrenar el clasificador, como para evaluar los comentarios con ese puntaje, se obtendrían mejores resultados, pero en cambio las tablas demuestran esa hipótesis. Analizando la segunda tabla, podemos decir que los comentarios con puntuación 3 tiene un impacto impacto nulo cuando se clasifican los comentarios positivos, sin embargo en el momento de evaluar los negativos el desempeño es inferior al clasificador entrenado con un conjunto de comentarios excluyendo puntuaciones 3. Esto es un dato interesante para considerar, si tomamos el caso número $25$ tenemos un $accuracy$ de $84.7 \%$ apenas superior al de la primera tabla. Cuando contrastamos con las métricas $Recall$ y $Precision$ concluímos que para el caso 1, existe una leve mejora respecto al caso 2.
+Para la obtención de los resultados, se implementó el módulo $Statistics.py$, el mismo utiliza los módulos $tarea\_1.py$ y $classification.py$, toma los 30 conjuntos de entrenamiento anteriormente generados y clasifica los comentarios según los mismos. Además posee la funcionalidad de generar las tablas presentes en esta sección.
+Se obtuvieron los siguientes resultados[\ref{tabla:1}] generando 30 conjuntos aleatorios de entrenamiento y test, los resultados obtenidos implican que el $accuracy$ del clasificador es de aproximadamente 80\%, el mejor caso se obtuvo en el conjunto de número 23, donde el $accuracy$ se aproximó a un 85 \%. Este estudio demuestra en un caso global, ya que con una cantidad apreciable de conjuntos distintos podemos obtener significancia estadística en el momento de evaluar el clasificador en forma genérica.
+En la tabla \ref{tabla:2} tenemos los resultados incluyendo las puntuaciones 3 como comentarios positivos. Intuitivamente se podría decir que eliminando los comentarios con puntuación 3 tanto para entrenar el clasificador, como para evaluar los comentarios con ese puntaje, se obtendrían mejores resultados, pero en cambio las tablas demuestran esa hipótesis. Analizando la segunda tabla, podemos decir que los comentarios con puntuación 3 tiene un impacto impacto nulo cuando se clasifican los comentarios positivos, sin embargo en el momento de evaluar los negativos el desempeño es inferior al clasificador entrenado con un conjunto de comentarios excluyendo puntuaciones 3. Esto es un dato interesante para considerar, si tomamos el caso número $10$ tenemos un $accuracy$ de $84.7 \%$ apenas inferior al de la primera tabla. Cuando contrastamos con las métricas $Recall$ y $Precision$ concluimos que para el caso 1, existe una leve mejora respecto al caso 2.
 Algunos detalles del estudio estadístico como ser la desviación estándar, y el test de normalidad de D Agostino se brindan en la tabla \ref{tabla:datos}. Para éste último como utilizamos un tamaño de muestra de 30 conjuntos, evaluaremos con un $\alpha = 0.02$ y a partir de esto tenemos las siguientes cotas  $[0.2622 , 0.2871]$, en el caso que el resultado del test de normalidad sea un valor que pertenece a dicho conjunto, la muestra es normal, por lo cual podemos utilizar como referencia para el planteo de conclusiones en cuanto a la calidad del clasificador se refiere.
 Los casos propuestos se resumen:
 \begin{itemize}
@@ -413,11 +413,11 @@ Podemos decir entonces que para el Caso 1, se obtiene una mejor evaluación de l
     \multicolumn{1}{|c}{$DA$}&
     \multicolumn{1}{|c}{$\sigma$}&
     \multicolumn{1}{|c|}{$DA$} \\ \hline
-    ACC & 0.029525 & 0.27678 & 0.027009 & 0.27709 \\ \hline
-    PP & 0.024305 & 0.27849 & 0.022482 & 0.26285 \\ \hline
-    RP & 0.033259 & 0.28061 & 0.030635 & 0.27720 \\ \hline
-    PN & 0.067953 & 0.27845 & 0.068971 & 0.27332 \\ \hline
-    RN & 0.047179 & 0.28124 & 0.065903 & 0.27842 \\ \hline
+    ACC & 0.029982 & 0.27883 & 0.027009 & 0.27709 \\ \hline
+    PP & 0.029982 & 0.27346 & 0.022482 & 0.26285 \\ \hline
+    RP & 0.031108 & 0.28232 & 0.030635 & 0.27720 \\ \hline
+    PN &  0.070022 & 0.28525 & 0.068971 & 0.27332 \\ \hline
+    RN & 0.049914 & 0.27910 & 0.065903 & 0.27842 \\ \hline
     \end{tabular}
 \end{center}
     \caption{Datos Estadísticos}
@@ -472,10 +472,10 @@ Para esta subsección posteriormente a un análisis estadístico que involucra v
 
 Se establece la separación de conjuntos en comentarios negativos y positivos, evaluado $Recall$ y $Precision$.
 \begin{itemize}
-  \item Accuracy: 0.8165
-  \item Precision Positive: 0.8531
-  \item Recall Positive: 0.9041
-  \item Precision Negative: 0.6923
+  \item Accuracy: 0.8078
+  \item Precision Positive: 0.8514
+  \item Recall Positive: 0.8922
+  \item Precision Negative: 0.6666
   \item Recall Negative: 0.5806
 \end{itemize}
 
@@ -491,7 +491,7 @@ En cambio tenemos la ecuación de $Recall$:
 \end{equation} 
 Análogo al anterior pero define la métrica en proporción a los Falsos-Negativos obtenidos por el clasificador.
 Con los datos obtenidos, podemos decir que el clasificador no posee un comportamiento óptimo, si evaluamos el clasificador en un CORPUS distinto, pero aplicado al mismo dominio del cine donde predominen comentarios negativos, posiblemente el clasificador sea correctamente entrenado, mejorando los resultados en gran proporción.
-Vale la pena destacar que existe anomalía en ciertos comentarios, como no corresponder la puntuación con el cuerpo del comentario, un ejemplo claro es la contradicción de cierto usuario cuyo comentarios es "Muy bueno!", y el puntaje asignado corresponde a un 2. Estas anomalías no están al alcance del clasificador si no se tiene un dominio suficientemente extenso como para llegar a la conclusión que el lema "bueno", condiciona que el comentario sea negativo. En otras palabras, es más probable que dicho lema corresponda a un comentario cuya puntuación sea positiva. Sin embargo, existen comentarios de la forma "No me gusta", en los cuales si bien contiene un lema que pondera a comentarios positivos, aplicado al contexto con una negación implica lo contrario y por ende esos casos se consideraron como heurística factible para mejorar las mátricas del clasificador en el momento de evaluar el conjunto test.
+Vale la pena destacar que existe anomalía en ciertos comentarios, como no corresponder la puntuación con el cuerpo del comentario, un ejemplo claro es la contradicción de cierto usuario cuyo comentarios es "Muy bueno!", y el puntaje asignado corresponde a un 2. Estas anomalías no están al alcance del clasificador si no se tiene un dominio suficientemente extenso como para llegar a la conclusión que el lema "bueno", condiciona que el comentario sea negativo. En otras palabras, es más probable que dicho lema corresponda a un comentario cuya puntuación sea positiva. Sin embargo, existen comentarios de la forma "No me gusta", en los cuales si bien contiene un lema que pondera a comentarios positivos, aplicado al contexto con una negación implica lo contrario y por ende esos casos se consideraron como heurística factible para mejorar las métricas del clasificador en el momento de evaluar el conjunto test.
 
 
 \begin{table}[!htb]
@@ -503,7 +503,7 @@ Vale la pena destacar que existe anomalía en ciertos comentarios, como no corre
  \multicolumn{1}{|l|}{NEG}
 \tabularnewline
   \hline
-  POS & 151 & 16 \\ \hline
+  POS & 149 & 18 \\ \hline
   NEG & 26 & 36 \\ \hline
 \end{tabular} 
 \end{center}
@@ -511,7 +511,7 @@ Vale la pena destacar que existe anomalía en ciertos comentarios, como no corre
 \label{tabla:matrix}
 \end{table}
 
-\subsection{Parte 5}
+\subsection{Parte 5} \label{sub:part5}
 Se seleccionaron los primeros 20 atributos en la tabla \ref{tabla:atributos} como podemos apreciar, los atributos corresponden en su gran mayoría a los que recurren con mayor frecuencia, los lemas graficados en la Parte 1 del obligatorio. Si realizamos un análisis según el tipo de atributo implementado, tenemos la siguiente información:
 \subsubsection{Atributos Positive-Negative}
 Los atributos que se utilizan con mayor frecuencia para este caso:
@@ -525,7 +525,6 @@ Los atributos que se utilizan con mayor frecuencia para este caso:
   \item positive(encantar)
   \item positive(lindo)
   \item negative(terminar)
-  \item negative(rato)
 \end{itemize}
 
 \subsubsection{Atributos Subjetive}
@@ -539,6 +538,7 @@ Los atributos que se utilizan con mayor frecuencia para este caso:
   \item subjetive\_neg(desear) = 1
   \item subjetive\_pos(vida) = 2
   \item subjetive\_pos(familia) = 2
+  \item subjetive\_pos(niño) = 1
 \end{itemize}
 
 
@@ -551,27 +551,26 @@ Los atributos que se utilizan con mayor frecuencia para este caso:
  \multicolumn{1}{|c|}{$\%$}
 \tabularnewline
   \hline
-subjetive\_neg(malo) = 1           &      neg : pos    &     26.4 : 1.0 \\ \hline
-          negative(malo) = True    &          neg : pos    &     24.0 : 1.0 \\ \hline
-     positive(excelente) = True    &          pos : neg    &     22.5 : 1.0 \\ \hline
-                no\_gusto = True    &          neg : pos    &     20.6 : 1.0 \\ \hline
-  positive(recomendable) = True    &          pos : neg    &     13.7 : 1.0 \\ \hline
-     subjetive\_neg(malo) = 2       &          neg : pos    &     10.8 : 1.0 \\ \hline
-       negative(aburrir) = True    &          neg : pos    &      8.8 : 1.0 \\ \hline
-  subjetive\_neg(aburrir) = 1       &          neg : pos    &      8.8 : 1.0 \\ \hline
-  subjetive\_neg(absurdo) = 1       &          neg : pos    &      8.8 : 1.0 \\ \hline
-      positive(divertir) = True    &          pos : neg    &      7.1 : 1.0 \\ \hline
-       positive(recomer) = True    &          pos : neg    &      6.4 : 1.0 \\ \hline
-      positive(encantar) = True    &          pos : neg    &      5.4 : 1.0 \\ \hline
-    subjetive\_neg(lento) = 1       &          neg : pos    &      5.3 : 1.0 \\ \hline
-    subjetive\_neg(falta) = 1       &          neg : pos    &      5.3 : 1.0 \\ \hline
-   subjetive\_neg(desear) = 1       &          neg : pos    &      4.9 : 1.0 \\ \hline
-     subjetive\_pos(vida) = 2       &          neg : pos    &      4.9 : 1.0 \\ \hline
-         positive(lindo) = True    &          pos : neg    &      3.3 : 1.0 \\ \hline
-      negative(terminar) = True    &          neg : pos    &      2.9 : 1.0 \\ \hline
-          negative(rato) = True    &          neg : pos    &      2.9 : 1.0 \\ \hline
-  subjetive\_pos(familia) = 2       &          neg : pos    &      2.9 : 1.0 \\ \hline
-
+    subjetive\_neg(malo) = 1         &        neg : pos    &     26.4 : 1.0 \\ \hline
+          negative(malo) = True     &         neg : pos    &     24.0 : 1.0 \\ \hline
+     positive(excelente) = True     &         pos : neg    &     22.5 : 1.0 \\ \hline
+                no\_gusto = True     &         neg : pos    &     20.6 : 1.0 \\ \hline
+  positive(recomendable) = True      &        pos : neg    &     13.7 : 1.0 \\ \hline
+     subjetive\_neg(malo) = 2         &        neg : pos    &     10.8 : 1.0 \\ \hline
+       negative(aburrir) = True      &        neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(aburrir) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
+  subjetive\_neg(absurdo) = 1         &        neg : pos    &      8.8 : 1.0 \\ \hline
+      positive(divertir) = True      &        pos : neg    &      7.1 : 1.0 \\ \hline
+       positive(recomer) = True      &        pos : neg    &      6.4 : 1.0 \\ \hline
+      positive(encantar) = True      &        pos : neg    &      5.4 : 1.0 \\ \hline
+    subjetive\_neg(lento) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
+    subjetive\_neg(falta) = 1         &        neg : pos    &      5.3 : 1.0 \\ \hline
+   subjetive\_neg(desear) = 1         &        neg : pos    &      4.9 : 1.0 \\ \hline
+     subjetive\_pos(vida) = 2         &        neg : pos    &      4.9 : 1.0 \\ \hline
+         positive(lindo) = True      &        pos : neg    &      3.3 : 1.0 \\ \hline
+      negative(terminar) = True      &        neg : pos    &      2.9 : 1.0 \\ \hline
+  subjetive\_pos(familia) = 2         &        neg : pos    &      2.9 : 1.0 \\ \hline
+     subjetive\_pos(niño) = 1         &        neg : pos    &      2.9 : 1.0 \\ \hline
 
 \end{tabular} 
 \end{center}
@@ -581,10 +580,10 @@ subjetive\_neg(malo) = 1           &      neg : pos    &     26.4 : 1.0 \\ \hlin
 
 Los términos más utilizados por los comentaristas en comentarios negativos sin lugar a dudas son "malo","aburrir" y "absurdo", a tal punto que "malo" aplica en dos atributos, los subjetivos y positive-negative, además en los primeros aparecen con gran frecuencia una y dos veces en los comentarios, sin embargo no tienen relevancia los lemas "gustar", "quedar" y "año", ubicados en 2,3 y 4 lugar en la lista de palabras negativas con mayor frecuencia. Esto tal vez implica que dichos lemas no tengan un aporte significativo cuando se trata de comentarios negativos, el primero(gustar) probablemente aparece que frecuencia en comentarios cuyo antecesor sea una negación y por ende pondera en comentarios negativos. Si se excluye el lema "año", puede mejorar incluso el clasificador.
 Para los comentarios positivos tenemos "excelente", "recomendable" y "divertir", aparecen en las posiciones 1, 3 y 6 de los lemas con mayor frecuencia en el análisis morfológico, sin embargo los lemas de la posición 2 y 5 no pueden ser descartados, ya que en el presente conjunto no aportan significancia estadística pero en cualquier otro conjunto el aporte puede ser sustancial.
-Los datos en la tabla son coherentes con los lemas más utilizados tanto para comentarios positivos como negativos. La funcion $show\_most\_informative\_features$ brinda la información necesaria a considerar en el momento de evaluar comentarios, a partir de estos atributos podemos llegar a la conclusión que el aporte del atributo $subjetive\_neg(malo)$ es de aproximadamente un cuarto, esto implica que si un comentario contiene este lema, es muy probable que al clasificarlo se lo valore como negativo, lo cual es coherente con el tipo de comentarios en general, excepto si se trata de comentarios que actúan como respuesta a usuarios, por ejemplo "@usuario, no me pareció una película mala.", en este caso el comentario puede poseer una valoración positiva, pero irremediablemente el clasificador por ponderar el lema malo seguramente clasifique dicho comentario como negativo.
+Los datos en la tabla son coherentes con los lemas más utilizados tanto para comentarios positivos como negativos. La función $show\_most\_informative\_features$ brinda la información necesaria a considerar en el momento de evaluar comentarios, a partir de estos atributos podemos llegar a la conclusión que el aporte del atributo $subjetive\_neg(malo)$ es de aproximadamente un cuarto, esto implica que si un comentario contiene este lema, es muy probable que al clasificarlo se lo valore como negativo, lo cual es coherente con el tipo de comentarios en general, excepto si se trata de comentarios que actúan como respuesta a usuarios, por ejemplo "@usuario, no me pareció una película mala.", en este caso el comentario puede poseer una valoración positiva, pero irremediablemente el clasificador por ponderar el lema malo seguramente clasifique dicho comentario como negativo.
 Las métricas de calidad indican que el clasificador tiene problemas evaluando comentarios negativos. Existen diversos factores para esto que se enumerarán a continuación.
 \begin{itemize}
-  \item En su totalidad tenemos 192 comentarios negativos, de los cuales evaluamos 62. Entonces estamos ante un problema de que no contamos con los comentarios suficientes para entrenar un clasificador de forma adecuada. Si observamos proporciones estamos evaluando un 32 \% de los comentarios, es decir que el método de selección aleatorio es prácticamente uniforme(utilizamos 70\% de los comentarios para el conjunto de entrenamiento). Descartando el método de selección como fuente de problema, concluímos que efectivamente el problema a considerar sería la cantidad de comentarios negativos dado el CORPUS no es suficiente para obtener buenas métricas para el clasificador.
+  \item En su totalidad tenemos 192 comentarios negativos, de los cuales evaluamos 62. Entonces estamos ante un problema de que no contamos con los comentarios suficientes para entrenar un clasificador de forma adecuada. Si observamos proporciones estamos evaluando un 32 \% de los comentarios, es decir que el método de selección aleatorio es prácticamente uniforme(utilizamos 70\% de los comentarios para el conjunto de entrenamiento). Descartando el método de selección como fuente de problema, concluimos que efectivamente el problema a considerar sería la cantidad de comentarios negativos dado el CORPUS no es suficiente para obtener buenas métricas para el clasificador.
   \item Lemas por sí solos no aportan lo suficiente, lo que no permite una evaluación precisa del clasificador. Fundamentalmente la coherencia entre el comentario y la puntuación depende de la relación entre los lemas presentes, involucra un contexto en muchas ocasiones poco predecible. Esto se debe a que existen atributos los cuales consideramos positivos que forman parte de un comentario negativo y viceversa. Esto implica que la evaluación depende del contexto y la relación de los lemas presentes, factores externos como ser frases con alto contenido irónico puede inducir al clasificador a evaluar de formar errónea un comentario. Lo último es complejo, implica el uso de puntuaciones que pueden cambiar totalmente el significado de un comentario, y esto no se evalúan únicamente utilizando lemas por separado.
 \end{itemize}
 Ambos puntos, tanto la carencia de comentarios negativos para entrenar correctamente al clasificador, como un contexto incierto conllevan a evaluar correctamente 56 \% de los comentarios negativos, una cifra baja aunque en contextos similares con CORPUS distintos esta métrica suele ser peor.
@@ -593,9 +592,16 @@ Sin embargo cuando tratamos de evaluar comentarios positivos, la métrica es cla
 
 
 \subsection{Resultados}
+
 Finalmente contamos con los resultados requeridos, ya sea ejecutando la aplicación que brinda una ventana con los gráficos o las imágenes guardadas en el directorio figures una vez terminada la ejecución.
-Primeramente analizaremos los resultados globales, para ello observamos gráfica de la figura [\ref{fig:todas}], en la cual las palabras más utilizadas son 'bueno', 'película', 'ver', 'haber', 'historia'. Posteriormente analizaremos a qué conjunto pertenecen dichas palabras, es decir, si se tratan de palabras positivas o negativas y si se incluyen en el léxico suministrado $listasElementosSubjetivos.pl$. Los primeros cuatro elementos suman aproximadamente un $30 \%$ de las palabras sintetizadas, puede interpretarse como un resultado específico del contexto, al tratarse de comentarios sobre películas el uso de las mismas es excesivo, ya sea por la calidad al escribir los comentarios por parte de los usuarios o porque el contexto en sí mismo amerita este tipo de palabras. Quiere decir estadísticamente que un tercio de las palabras encontradas en comentarios sobre películas se resume a las primeras cuatro.
-Para el siguiente caso se analiza las palabras presentes con mayor frecuencia en los comentarios evaluados con puntaje negativo, ellas son 'ver', 'película', 'haber', 'bueno', 'malo', paradójicamente el lema bueno es superior al lema malo, por lo que puede interpretarse que los usuarios comentan utilizando la negación, como ser un ejemplo "no es buena la película", en este caso involucra un comentario negativo pero utilizando un lema valorado positivo. Para más detalles en el momento de realizar el análisis se obtuvo una salida extra para procesar datos con mayor precisión e incluir en el presente informe un análisis con 'peso' estadístico. El mismo se puede encontrar en el directorio $res/$.
+Primeramente analizaremos los resultados globales, para ello observamos gráfica de la figura [\ref{fig:todas}], en la cual las palabras más utilizadas son 'bueno', 'excelente', 'gustar', 'recomendable', 'encantar'. Posteriormente analizaremos a qué conjunto pertenecen dichas palabras, es decir, si se tratan de palabras positivas o negativas y si se incluyen en el léxico suministrado $listasElementosSubjetivos.pl$. Los primeros cuatro elementos suman aproximadamente un $30 \%$ de las palabras sintetizadas, puede interpretarse como un resultado específico del contexto, al tratarse de comentarios sobre películas el uso de las mismas es excesivo, ya sea por la calidad al escribir los comentarios por parte de los usuarios o porque el contexto en sí mismo amerita este tipo de palabras. Quiere decir estadísticamente que un tercio de las palabras encontradas en comentarios sobre películas se resume a las primeras cuatro.
+Para el siguiente caso se analiza las palabras presentes con mayor frecuencia en los comentarios evaluados con puntaje negativo, ellas son 'bueno', 'malo', 'gustar', 'quedar', 'año', paradójicamente el lema bueno es superior al lema malo, por lo que puede interpretarse que los usuarios comentan utilizando la negación, como ser un ejemplo "no es buena la película", en este caso involucra un comentario negativo pero utilizando un lema valorado positivo. Para más detalles en el momento de realizar el análisis se obtuvo una salida extra para procesar datos con mayor precisión e incluir en el presente informe un análisis con 'peso' estadístico. El mismo se puede encontrar en el directorio $res/$.
+
+Lo anterior corresponde al análisis morfosintáctico de los comentarios. En cuanto a los resultados del clasificador implementado la mayoría de las conclusiones se han extraído de la parte 5[\ref{sub:part5}] en cuanto a los atributos de calidad se refieren. Cabe mencionar que la implementación del clasificador se realiza de forma sencilla mediante la utilización del conjunto de librerías $nltk$, lo cual permitió incluso realizar un análisis estadístico de los datos de forma parcial. Además de los atributos de calidad requeridos por la tarea, se pudieron acotar dichos valores realizando a través del estudio estadístico, se utilizaron como referencia la desviación estándar($\sigma$) como parámetro para acotar a través del promedio($X$), formando un intervalo de confianza $[X-\sigma, X+\sigma]$ y de esta forma estimar correctamente los parámetros de calidad utilizando una cantidad suficiente de conjuntos para llegar a estos resultados.
+Si bien no se llegaron a resultados esperados, puesto que se pretendía llegar a un clasificador con un $accuracy$ promedio de 90 \%, se pudo lograr un clasificador promedio. Esto demuestra la complejidad del problema, sin dudas es una temática que requeriría años de estudio, primeramente para analizar los conjuntos con otras herramientas que nos permitan seleccionar atributos que aporten de forma más eficiente a la solución del problema. La segunda problemática es lograr comprender adecuadamente la relación existente el contexto y los lemas utilizados, existe un dominio extenso, dependientes del contexto y por lo tanto no es suficiente utilizar únicamente atributos representativos a través de los lemas.
+
+
+
 
 \subsubsection{Lemas}
 \begin{figure}[!h]
@@ -633,7 +639,7 @@ La gráfica[\ref{fig:todas}] muestra las palabras más encontradas en los coment
   \caption{Todas las palabras negativas}
   \label{fig:allneg}
 \end{figure} 
-La gráfica[\ref{fig:allneg}] muestra las palabras más encontradas en los comentarios de puntuación negativa. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtengan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras.
+La gráfica[\ref{fig:allneg}] muestra las palabras más encontradas en los comentarios de puntuación negativa. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtengan resultados no del todo fiables.
 
 
 \begin{figure}[!h]
@@ -653,7 +659,7 @@ La gráfica[\ref{fig:negsub}] también se observa los bajos valores de los porce
   \label{fig:pos}
 \end{figure} 
 
-La gráfica[\ref{fig:pos}] muestra las palabras más encontradas en los comentarios de puntuación positiva. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtenegan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras y la gráfica correspondiente al Top de las palabras negativas. Se observa una mayor frecuencia de los términos “bueno” y “película” con respecto a los otros.
+La gráfica[\ref{fig:pos}] muestra las palabras más encontradas en los comentarios de puntuación positiva. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtengan resultados no del todo fiables. Se observa la presencia de las palabras “bueno”, “excelente'”, “gustar”,”recomendable”,”encantar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras y la gráfica correspondiente al Top de las palabras negativas. Se observa una mayor frecuencia de los términos “bueno” y “excelente” con respecto a los otros.
 
 
 \begin{figure}[!h]
@@ -664,10 +670,10 @@ La gráfica[\ref{fig:pos}] muestra las palabras más encontradas en los comentar
 \end{figure} 
 
 
-La gráfica[\ref{fig:possub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico anteriormente. En la gráfica se observa una diferencia notoria de los terminos “bueno” y “película” con respecto a los otros terminos en su frecuencia. Estos terminos también son los términos de mayor frecuencia en la gráfica Top palabras positivas.
+La gráfica[\ref{fig:possub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico anteriormente. En la gráfica se observa una diferencia notoria de los términos “bueno” y “humor” con respecto a los otros términos en su frecuencia. Estos terminos también son los términos de mayor frecuencia en la gráfica Top palabras positivas.
 
 \section{Conclusiones}\label{conclusions}
-Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación.
+Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación. Posteriormente detalles sobre los resultados obtenidos relacionados con la implementación.
 
 \subsection{Implementación}
 Lenguaje de programación alto nivel, presenta gran diversidad de librerías internas como externas que facilitan la tarea en gran parte. Su alto nivel permite no definir tipos específicos y de esta forma se trabaja de manera más fluida, aunque esto pueda llegar a confusiones si no se declaran correctamente las variables con un nombre adecuado.
@@ -679,6 +685,11 @@ Salvo detalles menores es un lenguaje adecuado para utilizarlo para el procesami
 Al brindar características de un paradigma funcional(map, zip, etc), brinda simplicidad y 'ahorro' en cantidad de líneas utilizadas en total.
 La unificación derivada de la programación lógica, combinada con paradigma funcional hace un lenguaje poderoso con lo que refiere manipulación de datos en general, una característica deseable también como  ser la posibilidad de generar APIs con swig y combinar la eficiencia de c++ en la ejecución de algoritmos que requieran uso excesivo del recurso CPU. 
 
+\subsection{Resultados}
+Se lograron resultados satisfactorios a lo que refiere la implementación del clasificador, la utilización de la librería $nltk$ permite un manejo sencillo y una representación trivial del problema a resolver. Los conjuntos utilizados para las pruebas se crearon dinámicamente sin mayores problemas, gracias a la versatilidad del lenguaje de programación.
+El análisis estadístico fue posible implementarlo de forma sencilla a lo que refiere la ejecución de las mismas. Se utilizaron herramientas para el cálculo de desviación estándar y estimadores de DAgostino como ser GNU-Octave, que al igual que Python brinda un nivel de abstracción alto para el procesamiento de gran cantidad de datos.
+Si bien como se mencionó en la sección Resultados correspondiente al Análisis, no se llegó a la meta principal de lograr un $accuracy$ del 90\%, en gran parte por la problemática de clasificar los comentarios negativos, así como no contar con un CORPUS lo suficientemente grande, como para obtener mejores datos en el momento de implementar atributos que eleven la calidad tanto el $Precision$ como $Recall$.
+Se estima que dados los resultados del laboratorio y todo el procesamiento de datos logrado, es posible mejorar el clasificador en un 5\% o 10\% si se cuenta con mayor tiempo para la realización de la tarea, de esta forma se lograría realizar un estudio más exhaustivo utilizando diferentes corpus para recolectar información más precisa, de esta forma generar un clasificador universal para el dominio de comentarios relativos a carteleras de cine. De todas formas conociendo las dificultades existentes en el problema, se arriba a que el estudio realizado ha aportado una herramienta muy poderosa en el momento de procesar y clasificar elementos, en este caso comentarios, pero el mismo puede ser aplicable en diversas áreas, ya sea para detectar errores o predecir comportamientos en determinado contexto.
 
 
 

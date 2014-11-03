@@ -154,6 +154,8 @@ class Utils:
             n_groups = min(n_groups, len(xvalues))
             ysize = max(values)
             fig, ax = plt.subplots()
+            # image size
+            fig.set_size_inches(18.5, 10.5)
             index = np.arange(n_groups)
             bar_width = 0.35
             opacity = 0.4
@@ -173,6 +175,9 @@ class Utils:
             ax.set_ylim(0, ysize * 1.05)
             plt.tight_layout()
             fig.savefig(self.__dir_images + filename, dpi=90)
+            #maximize window display
+            mng = plt.get_current_fig_manager()
+            mng.resize(*mng.window.maxsize())
             if self.Display:
                 plt.show()
 
@@ -277,6 +282,7 @@ class Utils:
         allWords = {}
 
         tokenizedComm = {}
+        totalComm = 0
         negComm = 0
         numComm = len(self.cell_range)
         it = 0
@@ -284,6 +290,7 @@ class Utils:
             it = it + 1
             (valor, key) = rows
             if key.value != self.Exc:
+                totalComm = totalComm + 1
                 if key.value < 3:
                     insert = mydicneg
                     negComm = negComm + 1
@@ -371,7 +378,7 @@ class Utils:
         self.generateData(mydicposSorted, 'positiveWords.csv')
         self.generateData(allWordsSorted, 'allWords.csv')
         self.generateStatisticData(allWordsSorted, mydicposSorted,
-            mydicnegSorted, numComm, negComm)
+            mydicnegSorted, totalComm, negComm)
 
         print redFont + 'Words All' + endFont
         for w in allWordsSorted[:100]:
@@ -407,9 +414,6 @@ if __name__ == "__main__":
     classify = Clasificator(Ver=ver)
     (posWords, negWords, posI, negI, tokenizedComm) = utils.process()
     (train, test) = classify.load_train_test_set()
-    #print posWords[:20]
-    #print ""
-    #print negWords[:20]
     (Metrics, num) = classify.process(posWords, negWords, posI, negI,
         tokenizedComm)
     classify.saveMetrics(Metrics)

@@ -50,7 +50,7 @@
 \maketitle
 
 \begin{abstract}
-En este presente documento se procede a la explicación, tanto de la implementación de la aplicación, así como los parámetros de configuración necesarios para la ejecución de la misma \ldots
+En este presente documento se procede a la explicación, tanto de la implementación de la aplicación, así como los parámetros de configuración necesarios para la ejecución de la misma.
 \end{abstract}
 
 \newpage
@@ -108,6 +108,8 @@ Para ejecutar la aplicación, únicamente se le debe brindar permisos de ejecuci
 $./tarea_1.py$
 O $./tarea_1.py -w$ para ejecutarlo utilizando webservices anteriormente descrito.
 
+Una aclaración importante, la aplicación se ha probado exclusivamente en ambiente UNIX, desde la instalación de Freeling hasta las librerías de Python, ante funcionamientos anómalos en plataformas Windows, se sugiere que el programa sea ejecutado en UNIX.
+Caso contrario de no disponer un entorno, igualmente puede ejecutarse el programa utilizando Webservices. Aunque el funcionamiento no es óptimo los resultados son semejantes.
 
 \section{Visualización}
 Se muestra la interacción del sistema, según el modo de ejecución.
@@ -242,8 +244,83 @@ Posteriormente por eficiencia se transforma dicha lista en un diccionario con lo
 En las gráficas se describen los valores porcentuales de las palabras en cuestión, con el fin de generar una idea sobre la utilización de las mismas en la totalidad de los comentarios.
 
 
+
+\subsection{Resultados}
+Finalmente contamos con los resultados requeridos, ya sea ejecutando la aplicación que brinda una ventana con los gráficos o las imágenes guardadas en el directorio figures una vez terminada la ejecución.
+Primeramente analizaremos los resultados globales, para ello observamos gráfica de la figura [\ref{fig:todas}], en la cual las palabras más utilizadas son 'bueno', 'película', 'ver', 'haber', 'historia'. Posteriormente analizaremos a qué conjunto pertenecen dichas palabras, es decir, si se tratan de palabras positivas o negativas y si se incluyen en el léxico suministrado $listasElementosSubjetivos.pl$. Los primeros cuatro elementos suman aproximadamente un $30 \%$ de las palabras sintetizadas, puede interpretarse como un resultado específico del contexto, al tratarse de comentarios sobre películas el uso de las mismas es excesivo, ya sea por la calidad al escribir los comentarios por parte de los usuarios o porque el contexto en sí mismo amerita este tipo de palabras. Quiere decir estadísticamente que un tercio de las palabras encontradas en comentarios sobre películas se resume a las primeras cuatro.
+Para el siguiente caso se analiza las palabras presentes con mayor frecuencia en los comentarios evaluados con puntaje negativo, ellas son 'ver', 'película', 'haber', 'bueno', 'malo', paradójicamente el lema bueno es superior al lema malo, por lo que puede interpretarse que los usuarios comentan utilizando la negación, como ser un ejemplo "no es buena la película", en este caso involucra un comentario negativo pero utilizando un lema valorado positivo. Para más detalles en el momento de realizar el análisis se obtuvo una salida extra para procesar datos con mayor precisión e incluir en el presente informe un análisis con 'peso' estadístico. El mismo se puede encontrar en el directorio $res/$.
+
+\subsubsection{Lemas}
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/Lemas.png}
+  \caption{Cantidad de lemas}
+  \label{fig:lemas}
+\end{figure} 
+Se grafica la cantidad de lemas obtenidos luego del procesamiento de datos[\ref{fig:lemas}].
+
+\subsubsection{Comentarios}
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/Comentarios.png}
+  \caption{Cantidad de comentarios}
+  \label{fig:com}
+\end{figure} 
+En este caso, se contabilizan la cantidad de comentarios positivos y negativos[\ref{fig:com}].
+
+\subsubsection{Gráficas}
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/AllWords.png}
+  \caption{Todas las palabras}
+  \label{fig:todas}
+\end{figure} 
+La gráfica[\ref{fig:todas}] muestra las palabras más encontradas en los comentarios punteados de manera positiva como negativa. Se aprecia en la misma una mayor cantidad de palabras de semántica positiva con respecto a las de semántica negativa.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/NegativeWords.png}
+  \caption{Todas las palabras negativas}
+  \label{fig:allneg}
+\end{figure} 
+La gráfica[\ref{fig:allneg}] muestra las palabras más encontradas en los comentarios de puntuación negativa. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtengan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/NegativeSubjetive.png}
+  \caption{Intersección palabras negativas}
+  \label{fig:negsub}
+\end{figure} 
+
+La gráfica[\ref{fig:negsub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico en la gráfica anterior. En la gráfica se observa una diferencia notoria del termino “malo” con respecto a los otros términos en su frecuencia.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/PositiveWords.png}
+  \caption{Todas las palabras positivas}
+  \label{fig:pos}
+\end{figure} 
+
+La gráfica[\ref{fig:pos}] muestra las palabras más encontradas en los comentarios de puntuación positiva. El bajo porcentaje obtenido de frecuencia de las palabras, se cree que es debido al ruido que poseen los datos, que lleva a que se obtenegan resultados no del todo fiables. Se observa la presencia de las palabras “ver”, “película'”, “haber”,”pelicula”,”bueno” ,”gustar” entre las primeras con mayor frecuencia, como también sucede en el caso de la gráfica de todas las palabras y la gráfica correspondiente al Top de las palabras negativas. Se observa una mayor frecuencia de los términos “bueno” y “película” con respecto a los otros.
+
+
+\begin{figure}[!h]
+  \centering
+    \includegraphics[width=0.8\textwidth]{./fig/PositiveSubjetiveWords.png}
+  \caption{Intersección palabras positivas}
+  \label{fig:possub}
+\end{figure} 
+
+
+La gráfica[\ref{fig:possub}] también se observa los bajos valores de los porcentajes de las palabras encontradas, se cree que esto es debido al ruido que poseen los datos como se explico anteriormente. En la gráfica se observa una diferencia notoria de los terminos “bueno” y “película” con respecto a los otros terminos en su frecuencia. Estos terminos también son los términos de mayor frecuencia en la gráfica Top palabras positivas.
+
 \section{Conclusiones}\label{conclusions}
-Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación, así como en el análisis de los datos.
+Se detallan algunas puntos a tener en cuenta luego de finalizada la presente tarea, se realizan algunos comentarios sobre la implementación.
 
 \subsection{Implementación}
 Lenguaje de programación alto nivel, presenta gran diversidad de librerías internas como externas que facilitan la tarea en gran parte. Su alto nivel permite no definir tipos específicos y de esta forma se trabaja de manera más fluida, aunque esto pueda llegar a confusiones si no se declaran correctamente las variables con un nombre adecuado.
@@ -255,7 +332,9 @@ Salvo detalles menores es un lenguaje adecuado para utilizarlo para el procesami
 Al brindar características de un paradigma funcional(map, zip, etc), brinda simplicidad y 'ahorro' en cantidad de líneas utilizadas en total.
 La unificación derivada de la programación lógica, combinada con paradigma funcional hace un lenguaje poderoso con lo que refiere manipulación de datos en general, una característica deseable también como  ser la posibilidad de generar APIs con swig y combinar la eficiencia de c++ en la ejecución de algoritmos que requieran uso excesivo del recurso CPU. 
 
-\subsection{Resultados}
+
+
+
 
 %\bibliographystyle{abbrv}
 %\bibliography{simple}

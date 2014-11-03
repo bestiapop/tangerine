@@ -10,6 +10,7 @@ import nltk
 from nltk.metrics import ConfusionMatrix
 from nltk.collocations import *
 
+
 class Clasificator:
 
     def __init__(self, Ver=2):
@@ -222,4 +223,3 @@ if __name__ == "__main__":
         train = "./resources/statistic/train" + str(i) + ".txt"
         test = "./resources/statistic/test" + str(i) + ".txt"
         c.generate_train_set(len(coments), 0.7, train, test)
-
